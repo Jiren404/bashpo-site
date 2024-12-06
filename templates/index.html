@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bashpo</title>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css" rel="stylesheet" type="text/css" />
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        inter: ['Inter', 'sans-serif'],
+                    },
+                },
+            },
+        };
+    </script>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Manrope:wght@200..800&display=swap" rel="stylesheet">
+</head>
+
+<body class="font-inter">
+
+    <header>
+        <div class="navbar bg-base-100 justify-start rounded-lg">
+            <div class="ml-5 lg:ml-20 mt-5 w-[80px] lg:w-[120px] relative">
+                <div class="absolute inset-0 bg-gradient-to-r from-sky-500 via-purple-500 to-pink-500 rounded-xl p-[2px]"></div>
+                <a href="/">
+                    <img alt="Tailwind CSS Navbar component" src="{{ url_for('static', filename='img/logo.jpg') }}" alt="Logo" class="rounded-lg relative z-10">
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <section>
+        <section class="flex justify-items-center">
+            <div class="justify-items-center relative mt-5 bg-[url('{{ url_for('static', filename='img/bg-1.jpg') }}')] bg-cover bg-center w-full h-[500px] lg:h-[800px]">
+                <div class="text-center mt-10">
+                    <h2 class="text-2xl lg:text-3xl font-bold bg-gradient-to-r from-sky-500 via-purple-500 to-pink-500 text-transparent bg-clip-text">
+                        SIGN IN
+                    </h2>
+                </div>
+                <div class="justify-start lg:justify-items-center mx-auto mt-5 lg:mt-10 box-border h-auto w-[300px] lg:h-[400px] lg:w-[700px] p-4 border rounded-3xl bg-[rgba(30,29,55,1)]">
+                    <form id="loginForm" class="mt-5 lg:mt-10">
+                        <div class="mt-5 lg:mt-10">
+                            <label for="username" class="block text-sm lg:text-base text-bold font-bold bg-gradient-to-r from-sky-500 via-purple-500 to-pink-500 text-transparent bg-clip-text">SIGN IN WITH USER NAME</label>
+                            <input type="text" id="username" name="username" class="pl-5 block rounded-lg w-full lg:w-[580px] h-[35px] lg:h-[40px] mt-3 bg-white text-black" placeholder="Enter Your Username" required>
+                        </div>
+                        <div class="mt-5 lg:mt-10">
+                            <label for="password" class="block text-sm lg:text-base text-bold">PASSWORD</label>
+                            <input type="password" id="password" name="password" class="pl-5 block rounded-lg w-full lg:w-[580px] h-[35px] lg:h-[40px] mt-3 bg-white text-black" placeholder="Enter Password" required>
+                        </div>
+                        <div class="mt-5 lg:mt-10 text-center">
+                            <button type="button" class="w-full w-[100px] lg:w-[250px] h-[45px] lg:h-[50px] font-bold bg-gradient-to-r from-sky-500 via-purple-500 to-pink-500 text-transparent text-white rounded-lg" onclick="handleLogin(event)">
+                                SIGN IN
+                            </button>
+                        </div>
+                    </form>
+                    <div class="text-center mt-5 lg:mt-6">
+                        <a href="/forgotpass" class="text-sky-500 underline hover:text-sky-700">Help, I can't sign in! Forgot Password?</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </section>
+
+    <section class="flex flex-col items-center justify-center p-5 lg:p-0">
+        <div class="text-center mt-5 mb-5">
+            <h1 class="text-2xl lg:text-3xl font-bold">New to Bashpo?</h1>
+        </div>
+        <div class="flex flex-col lg:flex-row gap-5 mb-5">
+            <a href="/newacc">
+                <button type="submit" class="text-bold w-full lg:w-[300px] h-[45px] font-bold bg-gradient-to-r from-sky-500 to-purple-500 text-transparent text-white rounded-lg">
+                    Create an account as buyer
+                </button>
+            </a>
+            <a href="/devacc">
+                <button type="button" class="px-3 text-bold w-full lg:w-[300px] h-[45px] font-bold bg-gradient-to-r from-sky-500 to-purple-500 text-transparent text-white rounded-lg">
+                    Create an account as developer
+                </button>
+            </a>
+        </div>
+    </section>
+
+    <script>
+        async function handleLogin(event) {
+            event.preventDefault();  // Prevent form submission
+
+            const formData = {
+                username: document.getElementById("username").value,
+                password: document.getElementById("password").value,
+            };
+
+            try {
+                const response = await fetch("/login", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(formData),
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    // Redirect to the appropriate dashboard based on the user type
+                    window.location.href = result.redirect_url;
+                } else {
+                    alert(result.error);  // Show error message if login fails
+                }
+            } catch (error) {
+                console.error("Error:", error);
+                alert("An unexpected error occurred. Please try again.");
+            }
+        }
+    </script>
+
+</body>
+</html>

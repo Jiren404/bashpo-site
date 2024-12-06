@@ -32,8 +32,8 @@
                 <div
                     class="absolute inset-0 bg-gradient-to-r from-sky-500 via-purple-500 to-pink-500 rounded-xl p-[2px]">
                 </div>
-                <a href="index.html">
-                    <img alt="Tailwind CSS Navbar component" src="img/logo.jpg" class="rounded-lg relative z-10">
+                <a href="/">
+                    <img alt="Tailwind CSS Navbar component" src="{{ url_for('static', filename='img/logo.jpg') }}" class="rounded-lg relative z-10">
                 </a>
             </div>
         </div>
@@ -43,25 +43,24 @@
         <div class="bg-gradient-to-r from-blue-800 to-blue-900 pr-20 md:w-1/2">
             <div class="ml-7 lg:ml-20 text-white">
                 <h1 class="text-bold text-2xl mt-3">CREATE DEVELOPER ACCOUNT</h1>
-                <form id="developerForm" action="your-server-endpoint" method="POST" class="mt-10"
-                    onsubmit="return validateForm()">
+                <form id="developerForm" class="mt-10">
                     <p class="text-l text-bold">Developer Name</p>
-                    <input type="text" id="developer-name" name="developer_name"
+                    <input type="text" id="user_name" name="user_name"
                         class="pl-5 block rounded-lg w-full lg:w-[500px] h-[35px] lg:h-[40px] mt-3 bg-white text-black"
                         placeholder="Enter Developer Name" required>
 
                     <p class="text-l text-bold mt-5">Enter Developer Company Name</p>
-                    <input type="text" id="company-name" name="company_name"
+                    <input type="text" id="company_name" name="company_name"
                         class="pl-5 block rounded-lg w-full lg:w-[500px] h-[35px] lg:h-[40px] mt-3 bg-white text-black"
                         placeholder="Enter Developer Company Name" required>
 
                     <p class="text-l text-bold mt-5">Enter Company Email</p>
-                    <input type="email" id="company-email" name="company_email"
+                    <input type="email" id="email" name="email"
                         class="pl-5 block rounded-lg w-full lg:w-[500px] h-[35px] lg:h-[40px] mt-3 bg-white text-black"
                         placeholder="Enter Company Email" required>
 
                     <p class="text-l text-bold mt-5">Enter Publisher (if any)</p>
-                    <select id="publisher" name="publisher"
+                    <select id="publisher_name" name="publisher_name"
                         class="pl-5 block rounded-lg w-full lg:w-[500px] h-[40px] mt-3 bg-white text-black" required>
                         <option value="" disabled selected>Select Publisher</option>
                         <option value="bandai_namco">Bandai Namco</option>
@@ -80,37 +79,56 @@
                     </div>
 
                     <div class="mt-6 text-center mb-10">
-                        <button type="submit"
-                            class="px-5 h-[40px] lg:w-[300px] lg:h-[50px] bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg text-bold">
-                            Create Account
-                        </button>
+                        <button type="button"
+    class="px-5 h-[40px] lg:w-[300px] lg:h-[50px] bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg text-bold"
+    onclick="sendDeveloperRegistrationData()"> <!-- Ensure this is correct -->
+    Create Account
+</button>
                     </div>
                 </form>
 
             </div>
         </div>
         <div
-            class="justify-items-center relative bg-[url('./img/bg-1.jpg')] bg-cover bg-center w-full h-[500px] lg:h-[800px] md:block hidden">
+            class="justify-items-center relative bg-[url('{{ url_for('static', filename='img/bg-1.jpg') }}')] bg-cover bg-center w-full h-[500px] lg:h-[800px] md:block hidden">
             <div class="absolute inset-0 bg-blue-800 opacity-20 z-0"></div>
         </div>
     </section>
-
     <script>
-        function validateForm() {
-            const developerName = document.getElementById('developer-name').value;
-            const companyName = document.getElementById('company-name').value;
-            const companyEmail = document.getElementById('company-email').value;
-            const publisher = document.getElementById('publisher').value;
-            const password = document.getElementById('password').value;
-
-            if (!developerName || !companyName || !companyEmail || !publisher || !password) {
-                document.getElementById('error-message').classList.remove('hidden');
-                return false;
+        async function sendDeveloperRegistrationData() {
+            const formData = {
+                user_name: document.getElementById("user_name").value,
+                email: document.getElementById("email").value,
+                password: document.getElementById("password").value,
+                company_name: document.getElementById("company_name").value,
+                publisher_name: document.getElementById("publisher_name").value,
+            };
+    
+            try {
+                const response = await fetch("/create_developer", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(formData),
+                });
+    
+                const result = await response.json();
+    
+                // Show response as an alert and redirect if successful
+                if (response.ok) {
+                    alert(result.success);  // Success message
+                    window.location.href = result.redirect_url;  // Redirect to index or home page
+                } else {
+                    alert(result.error);  // Show error message
+                }
+            } catch (error) {
+                console.error("Error:", error);
+                alert("An unexpected error occurred. Please try again.");
             }
-            document.getElementById('error-message').classList.add('hidden');
-            return true;
         }
     </script>
+    
 </body>
 
 </html>

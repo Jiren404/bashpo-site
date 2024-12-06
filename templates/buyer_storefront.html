@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buyer Dashboard</title>
+</head>
+<body>
+    <h1>Welcome to the Buyer Dashboard</h1>
+
+    <!-- Button to fetch the current user's info -->
+    <button onclick="fetchCurrentUser()">Get Current User Info</button>
+
+    <!-- Logout Button -->
+    <button onclick="logout()">Logout</button>
+
+    <p id="user-info"></p>
+
+    <script>
+        // Function to fetch current user data from the session
+        async function fetchCurrentUser() {
+            const response = await fetch('/current_user');
+            const data = await response.json();
+            if (data.username) {
+                // Display username, user_type, and email
+                document.getElementById('user-info').innerText = `Username: ${data.username}, User Type: ${data.user_type}, Email: ${data.email}`;
+            } else {
+                document.getElementById('user-info').innerText = data.error;  // If not logged in
+            }
+        }
+
+        // Logout function that clears the session and redirects to login
+        function logout() {
+            window.location.href = '/logout';  // Redirect to logout route
+        }
+    </script>
+
+</body>
+</html>
