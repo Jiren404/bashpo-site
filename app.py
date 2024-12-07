@@ -18,30 +18,44 @@ class User:
         self.company_name=''
         self.publisher_name=''
         self.user_type=user_type
+        self.account_status='active'
 
 def connect_db():
-    c=sqlite3.connect('bashpos_--definitely--_secured_database.db').cursor()
+    db=sqlite3.connect('bashpos_--definitely--_secured_database.db')
+    c=db.cursor()
     c.execute("""
-                CREATE TABLE IF NOT EXISTS USERS(
-              username TEXT UNIQUE NOT NULL,
-              email TEXT UNIQUE NOT NULL,
-              password TEXT NOT NULL,
-              buyer_address TEXT,
-              store_region TEXT CHECK(store_region IN('NA','LA','EU','ASI','')),
-              card_info INT,
-              company_name TEXT,
-              publisher_name TEXT CHECK(publisher_name IN('bandai_namco','playstation_publishing','xbox_game_studios','square_enix','self','')),
-              user_type TEXT CHECK(user_type IN('buyer','developer','admin'))
-              )
-              """)      
-    c.execute("""
-    CREATE TABLE IF NOT EXISTS WALLET_BALANCE (
-        username TEXT PRIMARY KEY,
-        balance REAL DEFAULT 0,
-        FOREIGN KEY (username) REFERENCES USERS(username)
+    CREATE TABLE IF NOT EXISTS USERS(
+        username TEXT UNIQUE NOT NULL,
+        email TEXT UNIQUE NOT NULL,
+        password TEXT NOT NULL,
+        buyer_address TEXT,
+        store_region TEXT CHECK(store_region IN('NA','LA','EU','ASI','')),
+        card_info INT,
+        company_name TEXT,
+        publisher_name TEXT CHECK(publisher_name IN('bandai_namco','playstation_publishing','xbox_game_studios','square_enix','self','')),
+        user_type TEXT CHECK(user_type IN('buyer','developer','admin')) NOT NULL,
+        account_status TEXT CHECK(account_status IN('active','terminated')) NOT NULL
     )
 """)
 
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS WALLET_BALANCE (
+            username TEXT PRIMARY KEY,
+            balance REAL DEFAULT 0,
+            FOREIGN KEY (username) REFERENCES USERS(username)
+        )
+    """)
+
+    # Insert the admin account
+    c.execute("""
+        INSERT OR REPLACE INTO USERS (username, email, password, user_type, account_status) 
+        VALUES ('LordGaben', 'newell@steampowered.com', '123456', 'admin', 'active')
+    """)
+    c.execute("""
+        INSERT INTO WALLET_BALANCE VALUES (?,?)
+                  """,('LordGaben',0))
+
+    db.commit()
     c.connection.close()
 
 
@@ -217,11 +231,11 @@ def create_buyer():
     # Insert new buyer into the database
     else: 
         c.execute("""
-            INSERT INTO USERS (username, email, password, buyer_address, store_region, card_info, user_type)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO USERS (username, email, password, buyer_address, store_region, card_info, user_type,account_status)
+            VALUES (?, ?, ?, ?, ?, ?, ?,?)
         """, (new_buyer.username, new_buyer.email, new_buyer.password, 
                 new_buyer.buyer_address, new_buyer.store_region, new_buyer.card_info, 
-                new_buyer.user_type))
+                new_buyer.user_type,'active'))
         c.execute("""
     INSERT INTO WALLET_BALANCE VALUES (?,?)
                   """,(new_buyer.username,0))
@@ -271,11 +285,11 @@ def create_developer():
     # Insert new buyer into the database
     else: 
         c.execute("""
-            INSERT INTO USERS (username, email, password, company_name, publisher_name, user_type)
-            VALUES (?, ?, ?, ?, ?, ?)
+            INSERT INTO USERS (username, email, password, company_name, publisher_name, user_type,account_status)
+            VALUES (?, ?, ?, ?, ?, ?,?)
         """, (new_developer.username, new_developer.email, new_developer.password, 
                 new_developer.company_name, new_developer.publisher_name, 
-                new_developer.user_type))
+                new_developer.user_type,'active'))
         c.execute("""
     INSERT INTO WALLET_BALANCE VALUES (?,?)
                   """,(new_developer.username,0))
