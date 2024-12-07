@@ -52,8 +52,12 @@ def connect_db():
         VALUES ('LordGaben', 'newell@steampowered.com', '123456', 'admin', 'active')
     """)
     c.execute("""
-        INSERT INTO WALLET_BALANCE VALUES (?,?)
-                  """,('LordGaben',0))
+    INSERT INTO WALLET_BALANCE (username, balance)
+    SELECT ?, ?
+    WHERE NOT EXISTS (
+        SELECT 1 FROM WALLET_BALANCE WHERE username = ?
+    )
+""", ('LordGaben', 0, 'LordGaben'))
 
     db.commit()
     c.connection.close()
