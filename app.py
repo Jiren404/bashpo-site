@@ -20,6 +20,16 @@ class User:
         self.user_type=user_type
         self.account_status='active'
 
+class Game_publish_request:
+      def __init__(self,game_name,game_genre,estimated_release_year,basic_description):
+            self.request_id=uuid.uuid4().hex
+            self.username=''
+            self.game_name=game_name
+            self.game_genre=game_genre
+            self.estimated_release_year=estimated_release_year
+            self.basic_description=basic_description
+            self.status='Pending'        
+
 def connect_db():
     db=sqlite3.connect('bashpos_--definitely--_secured_database.db')
     c=db.cursor()
@@ -56,6 +66,8 @@ def connect_db():
             VALUES ('LordGaben', 'newell@steampowered.com', '123456', 'admin', 'active')
         """)
         db.commit()
+
+
     c.execute("""
     INSERT INTO WALLET_BALANCE (username, balance)
     SELECT ?, ?
@@ -63,6 +75,19 @@ def connect_db():
         SELECT 1 FROM WALLET_BALANCE WHERE username = ?
     )
 """, ('LordGaben', 0, 'LordGaben'))
+    
+    c.execute("""
+    CREATE TABLE IF NOT EXISTS GAME_PUBLISH_REQUEST(
+        request_id TEXT, 
+        username TEXT,
+        game_name TEXT, 
+        game_genre TEXT, 
+        estimated_release_year INT(4), 
+        basic_description TEXT, 
+        status TEXT CHECK(status IN ('Pending', 'Accepted', 'Rejected'))
+    )
+""")
+    
 
     db.commit()
     c.connection.close()
@@ -344,8 +369,29 @@ def login_required(role):
 @app.route('/dev_dashboard')
 @login_required('developer')
 def developer_dashboard():
-    # Developer-specific logic
-    return render_template('dev_dashboard.html')
+    connect_db()
+    with sqlite3.connect('bashpos_--definitely--_secured_database.db') as db:
+        c = db.cursor()
+        c.execute("SELECT username,company_name,publisher_name,email FROM USERS WHERE user_type ='developer' and username=?",(session['username'],))
+        dev_data = c.fetchone()
+        dev_username=dev_data[0]
+        company_name=dev_data[1]
+        publisher_name=dev_data[2]
+        dev_email=dev_data[3]
+        c.execute("SELECT balance FROM WALLET_BALANCE WHERE username = ?",(session['username'],))
+        balance = c.fetchone()[0]
+
+        c.execute("SELECT game_name, status from GAME_PUBLISH_REQUEST WHERE username=? and status!='Pending'",(session['username'],))
+        game_req_data = c.fetchall()
+
+        # c.execute("SELECT COUNT(*) FROM USERS WHERE user_type ='buyer' and account_status = 'terminated'")
+        # terminated_users = c.fetchone()[0]
+        # c.execute("SELECT balance FROM WALLET_BALANCE WHERE username = ?",(session['username'],))
+        # balance = c.fetchone()[0]
+        # c.execute("SELECT username FROM USERS WHERE user_type ='buyer' and account_status = 'active'")
+        # all_users = c.fetchall()
+    return render_template('dev_dashboard.html',dev_username=dev_username, balance=balance,company_name=company_name,
+                           publisher_name=publisher_name.upper(),dev_email=dev_email,game_req_data=game_req_data)
 
 @app.route('/buyer_dashboard')
 @login_required('buyer')
@@ -370,18 +416,23 @@ def admin_dashboard():
         balance = c.fetchone()[0]
         c.execute("SELECT username FROM USERS WHERE user_type ='buyer' and account_status = 'active'")
         all_users = c.fetchall()
-       
+        c.execute("SELECT username,company_name FROM USERS WHERE user_type ='developer' and account_status = 'active'")
+        all_devs = c.fetchall()       
         c.execute("""
         SELECT u.username, w.balance
         FROM USERS u
         INNER JOIN WALLET_BALANCE w ON u.username = w.username
         WHERE u.user_type = 'developer';
     """)
+        
+
         developer_earnings=c.fetchall()
-    
+
+        all_requests=getRequests_admin()
 
 
-    return render_template('admin_dashboard.html', username=session['username'], active_users=active_users, developers=developers, terminated_users=terminated_users, balance=balance,all_users=all_users,developer_earnings=developer_earnings)
+    return render_template('admin_dashboard.html', username=session['username'], active_users=active_users, developers=developers, terminated_users=terminated_users, 
+                           balance=balance,all_users=all_users,developer_earnings=developer_earnings,all_devs=all_devs,all_requests=all_requests)
 
 @app.route('/get_active_buyers', methods=['GET'])
 def get_active_buyers():
@@ -404,6 +455,81 @@ def terminate_buyer():
         return jsonify({"message": f"User {username} terminated successfully."})
     else:
         return jsonify({"error": "Invalid request"}), 400
+
+
+
+
+
+
+
+@app.route('/SendPublishingRequest', methods=['GET','POST'])
+
+def Send_Publishing_Request():
+    if request.method == 'POST':
+        db=sqlite3.connect("bashpos_--definitely--_secured_database.db")
+        c=db.cursor()
+        req_json = request.json
+        Pub_request=Game_publish_request(req_json["game_name"],req_json["game_genre"],req_json["estimated_release_year"],req_json["basic_description"])
+        print(Pub_request)
+        game_avail_check=getPub_Req_Avail(req_json["game_name"])
+        if len(game_avail_check)!=0:
+            return jsonify({"success": False, "message": "Cannot send request as request for a game with the same name has already been accepted or waiting for approval"})
+        else:
+            c.execute("INSERT INTO GAME_PUBLISH_REQUEST VALUES(?,?,?,?,?,?,?)",
+                    (Pub_request.request_id,session['username'],Pub_request.game_name,Pub_request.game_genre,
+                        Pub_request.estimated_release_year,Pub_request.basic_description
+                        , Pub_request.status))
+            db.commit()
+            db.close()
+        
+            return  jsonify({"success": True,"message": "Publishing request for "+req_json['game_name']+ " sent successfully"})
+
+@app.route('/getPubReq', methods=['GET'])
+def getPub_Req_Avail(game_name):
+    game_name=game_name
+    c = sqlite3.connect("bashpos_--definitely--_secured_database.db").cursor()
+    c.execute("SELECT * FROM GAME_PUBLISH_REQUEST where game_name=? and status!='Rejected'",(game_name,))
+    data=c.fetchall()
+    return data
+
+
+@app.route('/getRequests', methods=['GET'])
+def getRequests_admin():
+    c = sqlite3.connect("bashpos_--definitely--_secured_database.db").cursor()
+    c.execute("SELECT * FROM GAME_PUBLISH_REQUEST where status='Pending'")
+    data=c.fetchall()
+    return data
+
+
+@app.route('/updateRequest', methods=['POST'])
+def update_request():
+ 
+    req_json = request.json
+    request_id = req_json.get('request_id')
+    status = req_json.get('status')
+
+    if not request_id or status not in ['Accepted', 'Rejected']:
+        return jsonify({"response": "Invalid request data"}), 400
+    db = sqlite3.connect('bashpos_--definitely--_secured_database.db')
+    c = db.cursor()
+    c.execute(
+        "UPDATE GAME_PUBLISH_REQUEST SET status=? WHERE request_id=?",
+        (status, request_id),
+    )
+    if status=='Accepted':
+        c.execute("UPDATE WALLET_BALANCE SET balance=balance+1000 where username='LordGaben'")
+    db.commit()
+    return jsonify({"message": "Request updated to "+status})
+
+
+    
+    
+
+
+
+
+
+
     
 @app.route('/update_password', methods=['GET', 'POST'])
 def update_password():

@@ -42,7 +42,7 @@
                 <!-- Disabled Option (Gradient Background) -->
                 <option value="" disabled selected 
                     class="bg-gradient-to-r from-[#515151] to-[#676161] text-[#1A97F0] text-center font-bold">
-                    {{ username }} {{ balance }} $
+                    {{ username }} <span class="text-base mb-5 font-bold text-white"></span>{{ balance }} $</span>
                 </option>
                 <!-- Dropdown Menu Items -->
                 <option value="view_revenue" class="bg-[#b3b3b3] text-white">View Revenue</option>
@@ -146,9 +146,9 @@
         <div
             class="relative bg-[url('{{ url_for('static', filename='img/admin_bg.jpg') }}')] bg-cover bg-center w-full min-h-screen bg-sky-800 opacity-80">
             <h1
-            class="mt-5 box-border border w-auto px-4 lg:w-[450px] mx-auto lg:mx-20 bg-white text-xl sm:text-2xl lg:text-4xl font-bold my-5 text-black text-center tracking-[0.07em]"
+            class="mt-5 box-border border w-auto px-4 lg:w-[500px] mx-auto lg:mx-20 bg-white text-xl sm:text-2xl lg:text-4xl font-bold my-5 text-black text-center tracking-[0.07em]"
             style="font-family: 'Istok Web', sans-serif;">
-            Welcome, LordGaben
+            Bow before LordGaben
         </h1>
             <div
                 class="flex flex-col lg:flex-row justify-between items-start lg:items-center mx-4 lg:mx-20 space-y-6 lg:space-y-0">
@@ -161,11 +161,86 @@
                 </div>
 
                 <div class="grid gap-4 w-full lg:w-auto">
+     <!--####################################VIEW PUBLISH REQ#########################-->
+     
+     
+
+
                     
-                        <button type="button"
+                                          
+                        <button type="button" id="ViewPublishReqButton" data-modal-target="ViewPublishReqModal" data-modal-toggle="ViewPublishReqModal"
                             class="w-full lg:w-[300px] h-[45px] font-bold bg-gradient-to-r from-blue-900 to-purple-700 text-white rounded-lg">
-                            View Publication Requests
+                            View Publishing Requests
                         </button>
+                        <!-- Main modal -->
+<!-- Main modal -->
+<div id="ViewPublishReqModal" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed inset-0 z-50 justify-center items-center flex">
+    <div class="relative p-4 w-full max-w-xl h-full md:h-auto">
+        <!-- Modal content -->
+        <div class="relative p-4 bg-white rounded-lg shadow dark:bg-gray-800 sm:p-5">
+            <!-- Modal header -->
+            <div class="flex justify-between mb-4 rounded-t sm:mb-5">
+                <div class="text-lg text-gray-900 md:text-xl dark:text-white">
+                    <h3 class="font-semibold">
+                        Pending Requests
+                    </h3>
+                </div>
+                <div>
+                    <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 inline-flex dark:hover:bg-gray-600 dark:hover:text-white" data-modal-toggle="ViewPublishReqModal">
+                        <svg aria-hidden="true" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+                        <span class="sr-only">Close modal</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Search Bar -->
+            
+
+            <!-- Display list of active buyers -->
+            <div class="mt-4">
+                <ul id="buyerList" class="list-disc pl-5 space-y-4"> <!-- Added spacing between list items -->
+                    {% for requests in all_requests %}
+                        <li class="flex items-center justify-between mb-4 p-4 border border-gray-300 rounded-lg bg-transparent"> <!-- Removed white background -->
+                            <!-- Request details -->
+                            <div class="flex flex-col space-y-1">
+                                <span class="text-gray-700 font-medium text-white">Game Name: {{ requests[2] }}</span>
+
+                                <span class="text-gray-700 font-medium text-white">Publisher username: {{ requests[1] }}</span>
+                                <span class="text-gray-700 font-medium text-white">Genre: {{ requests[3] }}</span>
+                                <span class="text-gray-700 font-medium text-white">Estimated Release Year: {{ requests[4] }}</span>
+                                <span class="text-gray-700 font-medium text-white">Description: {{ requests[5] }}</span>
+                            </div>
+            
+                            <!-- Action buttons -->
+                            <div class="flex space-x-3">
+                                <!-- Accept Button -->
+                                <button type="button" 
+                                    class="text-white bg-green-600 hover:bg-green-700 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-xs px-4 py-2 dark:bg-green-500 dark:hover:bg-green-600 dark:focus:ring-green-900" 
+                                    data-request_id="{{ requests[0] }}" 
+                                    data-status="Accepted" 
+                                    onclick="updateRequest(this)">
+                                    Accept
+                                </button>
+                                <!-- Reject Button -->
+                                <button type="button" 
+                                    class="text-white bg-red-600 hover:bg-red-700 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-xs px-4 py-2 dark:bg-red-500 dark:hover:bg-red-600 dark:focus:ring-red-900" 
+                                    data-request_id="{{ requests[0] }}" 
+                                    data-status="Rejected" 
+                                    onclick="updateRequest(this)">
+                                    Reject
+                                </button>
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            
+        </div>
+    </div>
+</div>
+
+
+                        
 
  <!--                                   ############################################################################################################                                -->               
                     
@@ -182,7 +257,7 @@
             <!-- Modal header -->
             <div class="flex justify-between mb-4 rounded-t sm:mb-5">
                 <div class="text-lg text-gray-900 md:text-xl dark:text-white">
-                    <h3 class="font-semibold ">
+                    <h3 class="font-semibold">
                         Active Buyers
                     </h3>
                 </div>
@@ -194,17 +269,72 @@
                 </div>
             </div>
 
+            <!-- Search Bar -->
+            <div class="mb-4">
+                <input type="text" id="searchInput_buyer" placeholder="Search by username..." class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring focus:border-blue-300">
+            </div>
+
             <!-- Display list of active buyers -->
             <div class="mt-4">
-              
-                <ul class="list-disc pl-5">
+                <ul id="buyerList" class="list-disc pl-5">
                     {% for user in all_users %}
                         <li class="flex items-center justify-between mb-4">
-                            <span>{{ user[0] }}</span> <!-- Display the username -->
-                            <!-- Smaller Terminate Button -->
+                            <span class="buyer-username">{{ user[0] }}</span> <!-- Display the username -->
                             <button type="button" class="text-white bg-red-600 hover:bg-red-700 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-xs px-3 py-1.5 text-center dark:bg-red-500 dark:hover:bg-red-600 dark:focus:ring-red-900" data-username="{{ user[0] }}" onclick="terminateUser(this)">
                                 Terminate
                             </button>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-------------------------------------------####################################-->
+            <button type="button" id="DeveloperButton" data-modal-target="DeveloperModal" data-modal-toggle="DeveloperModal"
+            class="w-full lg:w-[300px] h-[45px] font-bold bg-gradient-to-r from-blue-900 to-purple-700 text-white rounded-lg">
+            Developer List
+            </button>
+            <!-- Main modal -->
+<div id="DeveloperModal" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed inset-0 z-50 justify-center items-center flex">
+    <div class="relative p-4 w-full max-w-xl h-full md:h-auto">
+        <!-- Modal content -->
+        <div class="relative p-4 bg-white rounded-lg shadow dark:bg-gray-800 sm:p-5">
+            <!-- Modal header -->
+            <div class="flex justify-between mb-4 rounded-t sm:mb-5">
+                <div class="text-lg text-gray-900 md:text-xl dark:text-white">
+                    <h3 class="font-semibold">
+                        Developers list
+                    </h3>
+                </div>
+                <div>
+                    <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 inline-flex dark:hover:bg-gray-600 dark:hover:text-white" data-modal-toggle="DeveloperModal">
+                        <svg aria-hidden="true" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+                        <span class="sr-only">Close modal</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Search Bar -->
+            <div class="mb-4">
+                <input type="text" id="searchInput_dev" placeholder="Search by company name..." class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring focus:border-blue-300">
+            </div>
+
+            <!-- Display list of active buyers -->
+            <div class="mt-4">
+                <ul id="devList" class="list-disc pl-5">
+                    
+                    <div class="flex justify-between items-center w-full">
+                        <span class="dev-username text-left text-white font-bold">Company Name</span> <!-- Left-aligned -->
+                        <span class="dev-company_name text-right text-white font-bold">Username</span> <!-- Right-aligned -->
+                    </div>
+                    <br>
+                    {% for dev in all_devs %}
+                        <li class="flex items-center justify-between mb-4">
+                            <span class="dev-username">{{ dev[1] }}</span> <!-- Display the username -->
+                            <span class="dev-company_name">{{ dev[0] }}</span> 
+                           
                         </li>
                     {% endfor %}
                 </ul>
@@ -312,6 +442,25 @@
             window.location.href = '/logout'; // Redirect to logout route
         }
         
+        function initializeSearch_buyer() {
+    const searchInput = document.getElementById('searchInput_buyer');
+    const userList = document.querySelectorAll('#ActiveBuyerModal ul li');
+
+    searchInput.addEventListener('input', function () {
+        const filter = searchInput.value.toLowerCase();
+
+        userList.forEach((userItem) => {
+            const username = userItem.querySelector('span').textContent.toLowerCase();
+
+            // Show or hide the user based on the search input
+            if (username.includes(filter)) {
+                userItem.style.display = ''; // Show
+            } else {
+                userItem.style.display = 'none'; // Hide
+            }
+        });
+    });
+}   
   // Function to initialize modal functionality
   function initializeModal_active_buyer() {
     const openModalButton = document.getElementById('ActiveBuyerButton');
@@ -363,12 +512,101 @@ function initializeModal_developer_revenue() {
         }
     });
 }
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////developer list////////////////////
+function initializeSearch_dev() {
+    const searchInput = document.getElementById('searchInput_dev');
+    const userList = document.querySelectorAll('#DeveloperModal ul li');
+
+    searchInput.addEventListener('input', function () {
+        const filter = searchInput.value.toLowerCase();
+
+        userList.forEach((userItem) => {
+            const username = userItem.querySelector('span').textContent.toLowerCase();
+
+            // Show or hide the user based on the search input
+            if (username.includes(filter)) {
+                userItem.style.display = ''; // Show
+            } else {
+                userItem.style.display = 'none'; // Hide
+            }
+        });
+    });
+}   
+  // Function to initialize modal functionality
+  function initializeModal_developer_list() {
+    const openModalButton = document.getElementById('DeveloperButton');
+    const modal = document.getElementById('DeveloperModal');
+    const closeModalButton = modal.querySelector('[data-modal-toggle="DeveloperModal"]');
+    
+    // Open the modal when the button is clicked
+    openModalButton.addEventListener('click', function() {
+      modal.classList.remove('hidden'); // Show the modal
+      document.body.style.overflow = 'hidden'; // Prevent body scrolling when modal is open
+    });
+
+    // Close the modal when the close button (X) is clicked
+    closeModalButton.addEventListener('click', function() {
+      modal.classList.add('hidden'); // Hide the modal
+      document.body.style.overflow = ''; // Re-enable body scrolling
+    });
+
+    // Close the modal if the user clicks outside of the modal content (overlay click)
+    modal.addEventListener('click', function(event) {
+      if (event.target === modal) {
+        modal.classList.add('hidden');
+        document.body.style.overflow = '';
+      }
+    });
+  }
+/////publishing list//////
+function showSeePubReqModal() {
+        const modal = document.getElementById('ViewPublishReqModal');
+        modal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden'; // Prevent body scrolling when modal is open
+    }
+
+  // Function to initialize modal functionality
+  function initializeModal_ViewPublishReq() {
+    const openModalButton = document.getElementById('ViewPublishReqButton');
+    const modal = document.getElementById('ViewPublishReqModal');
+    const closeModalButton = modal.querySelector('[data-modal-toggle="ViewPublishReqModal"]');
+    
+    // Open the modal when the button is clicked
+    openModalButton.addEventListener('click', function() {
+      modal.classList.remove('hidden'); // Show the modal
+      document.body.style.overflow = 'hidden'; // Prevent body scrolling when modal is open
+    });
+
+    // Close the modal when the close button (X) is clicked
+    closeModalButton.addEventListener('click', function() {
+      modal.classList.add('hidden'); // Hide the modal
+      document.body.style.overflow = ''; // Re-enable body scrolling
+    });
+
+    // Close the modal if the user clicks outside of the modal content (overlay click)
+    modal.addEventListener('click', function(event) {
+      if (event.target === modal) {
+        modal.classList.add('hidden');
+        document.body.style.overflow = '';
+      }
+    });
+  }
+/////////////////////////////////////
+  
+
+
+
+
 
 
   // Initialize the modal functionality once the page is loaded
   window.addEventListener('DOMContentLoaded', function() {
     initializeModal_active_buyer();
+    initializeModal_developer_list();
     initializeModal_developer_revenue(); 
+    initializeSearch_buyer();
+    initializeSearch_dev();
+    initializeModal_ViewPublishReq();
 
   });
   // JavaScript function to handle the terminate action
@@ -381,6 +619,34 @@ function initializeModal_developer_revenue() {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({ username: username })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.message) {
+                alert(data.message); // Display success message
+                button.closest('li').remove(); // Remove the user from the list
+                window.location.href = "/";
+            } else {
+                alert(data.error); // Display error message
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Something went wrong!');
+        });
+        
+    }
+
+    function updateRequest(button) {
+        const request_id = button.getAttribute('data-request_id');
+        const status= button.getAttribute('data-status');
+
+        fetch('/updateRequest', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ request_id:request_id,status:status })
         })
         .then(response => response.json())
         .then(data => {
