@@ -25,7 +25,7 @@ def connect_db():
     c=db.cursor()
     c.execute("""
     CREATE TABLE IF NOT EXISTS USERS(
-        username TEXT UNIQUE NOT NULL,
+        username TEXT PRIMARY KEY UNIQUE NOT NULL,
         email TEXT UNIQUE NOT NULL,
         password TEXT NOT NULL,
         buyer_address TEXT,
@@ -46,11 +46,16 @@ def connect_db():
         )
     """)
 
-    # Insert the admin account
-    c.execute("""
-        INSERT OR REPLACE INTO USERS (username, email, password, user_type, account_status) 
-        VALUES ('LordGaben', 'newell@steampowered.com', '123456', 'admin', 'active')
-    """)
+    c.execute("SELECT * FROM USERS WHERE username = 'LordGaben'")
+    existing_user = c.fetchone()
+
+    if existing_user is None:
+        # Insert the user with the password for the first time
+        c.execute("""
+            INSERT INTO USERS (username, email, password, user_type, account_status)
+            VALUES ('LordGaben', 'newell@steampowered.com', '123456', 'admin', 'active')
+        """)
+        db.commit()
     c.execute("""
     INSERT INTO WALLET_BALANCE (username, balance)
     SELECT ?, ?
@@ -66,7 +71,7 @@ def connect_db():
 @app.route('/')
 def index():
     connect_db()
-    # Check session for user_type and redirect accordingly
+
     if 'user_type' in session:
         if session['user_type'] == 'buyer':
             return redirect(url_for('buyer_dashboard'))
@@ -82,7 +87,6 @@ def login():
     db = sqlite3.connect('bashpos_--definitely--_secured_database.db')
     c = db.cursor()
     
-    # If the request is a GET request, render the login page
     if request.method == 'GET':
         return render_template('index.html')
     
@@ -96,45 +100,48 @@ def login():
         # Authenticate user
         c.execute("SELECT username, user_type FROM USERS WHERE username = ? AND password = ?", (username, password))
         user = c.fetchone()
+        c.execute("SELECT username, user_type FROM USERS WHERE username = ? AND password = ? AND account_status='active'", (username, password))
+        user_active_check = c.fetchone()
         print("Fetched user:", user)
 
         if user:
+            if user_active_check:
             # Set session data
-            session['username'] = user[0]
-            session['user_type'] = user[1]
+                session['username'] = user[0]
+                session['user_type'] = user[1]
+            else:
+                 return jsonify({"error": "Account Terminated due to fraudent activities"}), 401    
 
-            # Respond with success and user type
             return jsonify({
                 "success": True,
-                "redirect_url": url_for(f"{user[1]}_dashboard")  # Redirect to appropriate dashboard based on user type
+                "redirect_url": url_for(f"{user[1]}_dashboard") 
             }), 200  # 200 OK response
         else:
-            # Return an error if the credentials are invalid
-            return jsonify({"error": "Invalid credentials"}), 401  # 401 Unauthorized
-
-    # If the request is not JSON, just render the login page
+         
+            return jsonify({"error": "Invalid credentials"}), 401  
+   
     return render_template('index.html')
 
 @app.route('/logout')
 def logout():
     session.clear()  # Clear all session data
-    return redirect(url_for('login'))  # Redirect to login page
+    return redirect(url_for('login')) 
 
-# Route to fetch the current user's account info from session
+
 @app.route('/current_user')
 def current_user():
     if 'user_type' in session:
         username = session['username']
         
-        # Connect to the database
+
         db = sqlite3.connect('bashpos_--definitely--_secured_database.db')
         c = db.cursor()
         
-        # Query to get the email of the logged-in user
+
         c.execute("SELECT email FROM USERS WHERE username = ?", (username,))
         user_data = c.fetchone()
         
-        # If user is found, return username, email, and user_type
+        
         if user_data:
             return jsonify({"username": username, "user_type": session['user_type'], "email": user_data[0]})
         else:
@@ -145,8 +152,8 @@ def current_user():
 
 @app.route('/newacc', methods=['GET'])
 def new_account_buyer():
-    # Render the buyer account creation page
-    return render_template('newacc.html')  # Replace with the actual buyer signup HTML file
+
+    return render_template('newacc.html')  
 
 @app.route('/forgotpass', methods=['GET'])
 def forgot_pass():
@@ -349,8 +356,85 @@ def buyer_dashboard():
 @app.route('/admin_dashboard')
 @login_required('admin')
 def admin_dashboard():
-    # Buyer-specific logic
-    return render_template('admin_dashboard.html')
+    with sqlite3.connect('bashpos_--definitely--_secured_database.db') as db:
+        c = db.cursor()
+        c.execute("SELECT COUNT(*) FROM USERS WHERE user_type ='buyer' and account_status = 'active'")
+        active_users = c.fetchone()[0]
+
+        c.execute("SELECT COUNT(*) FROM USERS WHERE user_type = 'developer'")
+        developers = c.fetchone()[0]
+
+        c.execute("SELECT COUNT(*) FROM USERS WHERE user_type ='buyer' and account_status = 'terminated'")
+        terminated_users = c.fetchone()[0]
+        c.execute("SELECT balance FROM WALLET_BALANCE WHERE username = ?",(session['username'],))
+        balance = c.fetchone()[0]
+        c.execute("SELECT username FROM USERS WHERE user_type ='buyer' and account_status = 'active'")
+        all_users = c.fetchall()
+       
+        c.execute("""
+        SELECT u.username, w.balance
+        FROM USERS u
+        INNER JOIN WALLET_BALANCE w ON u.username = w.username
+        WHERE u.user_type = 'developer';
+    """)
+        developer_earnings=c.fetchall()
+    
+
+
+    return render_template('admin_dashboard.html', username=session['username'], active_users=active_users, developers=developers, terminated_users=terminated_users, balance=balance,all_users=all_users,developer_earnings=developer_earnings)
+
+@app.route('/get_active_buyers', methods=['GET'])
+def get_active_buyers():
+    with sqlite3.connect('bashpos_--definitely--_secured_database.db') as db:
+        c = db.cursor()
+        c.execute("SELECT username FROM USERS WHERE user_type = 'buyer' AND account_status = 'active'")
+        buyers = c.fetchall()  # This will return a list of tuples
+    return jsonify(buyers)  # Return active buyers as JSON
+
+@app.route('/terminate_buyer', methods=['POST'])
+def terminate_buyer():
+    data = request.json  # Expecting {"username": "buyer_username"}
+    username = data.get('username')
+
+    if username:
+        with sqlite3.connect('bashpos_--definitely--_secured_database.db') as db:
+            c = db.cursor()
+            c.execute("UPDATE USERS SET account_status = 'terminated' WHERE username = ?", (username,))
+            db.commit()
+        return jsonify({"message": f"User {username} terminated successfully."})
+    else:
+        return jsonify({"error": "Invalid request"}), 400
+    
+@app.route('/update_password', methods=['GET', 'POST'])
+def update_password():
+    if 'username' not in session:
+        return redirect(url_for('login'))
+    
+    if request.method == 'POST':
+        data = request.json
+        current_password = data.get('current_password')
+        new_password = data.get('new_password')
+        
+        username = session['username']
+        db = sqlite3.connect('bashpos_--definitely--_secured_database.db')
+        c = db.cursor()
+
+        # Check if the current password is correct
+        c.execute("SELECT password FROM USERS WHERE username = ?", (username,))
+        stored_password = c.fetchone()
+
+        if stored_password and stored_password[0] == current_password:
+            # Update the password
+            print('newpass: ',new_password,username)
+            c.execute("UPDATE USERS SET password = ? WHERE username = ?", (new_password, username))
+            db.commit()
+            db.close()
+
+            return jsonify({"success": True, "message": "Password updated successfully!"})
+        else:
+            return jsonify({"success": False, "error": "Incorrect current password!"})
+
+    return redirect(url_for('logout'))  # Render the password update page if GET request    
 
 if __name__=="__main__":
     app.run(debug=True, port=1097)
