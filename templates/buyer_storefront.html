@@ -1,39 +1,317 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Buyer Dashboard</title>
-</head>
-<body>
-    <h1>Welcome to the Buyer Dashboard</h1>
-
-    <!-- Button to fetch the current user's info -->
-    <button onclick="fetchCurrentUser()">Get Current User Info</button>
-
-    <!-- Logout Button -->
-    <button onclick="logout()">Logout</button>
-
-    <p id="user-info"></p>
-
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bashpo Home</title>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css" rel="stylesheet" type="text/css" />
     <script>
-        // Function to fetch current user data from the session
-        async function fetchCurrentUser() {
-            const response = await fetch('/current_user');
-            const data = await response.json();
-            if (data.username) {
-                // Display username, user_type, and email
-                document.getElementById('user-info').innerText = `Username: ${data.username}, User Type: ${data.user_type}, Email: ${data.email}`;
-            } else {
-                document.getElementById('user-info').innerText = data.error;  // If not logged in
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        inter: ['Inter', 'sans-serif']
+                    }
+                }
             }
         }
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/1.6.0/flowbite.min.js"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Manrope:wght@200..800&display=swap"
+        rel="stylesheet" />
+</head>
+
+<body class="font-inter">
+    <!-- Header Section -->
+    <header
+        class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-2 p-2 bg-base-100 rounded-lg">
+        <div class="ml-5 lg:ml-20 mt-5 w-[80px] lg:w-[120px]">
+            <div
+                class="bg-gradient-to-r from-sky-700 via-purple-400 to-violet-700 rounded-xl p-[2px] flex items-center">
+                <a href="/" class="block w-full h-full">
+                    <img alt="Logo" src="{{ url_for('static', filename='img/logo.jpg') }}" class="rounded-lg" />
+                </a>
+            </div>
+        </div>
+        <div class="mt-3 lg:mt-0 lg:mr-5">
+            <select id="user-name" name="user_name"
+                class="block rounded-lg w-full lg:w-[200px] h-[40px] bg-gradient-to-r from-[#515151] to-[#676161] text-[#1A97F0] font-bold focus:ring-2 focus:ring-white focus:text-black appearance-none"
+                onchange="handleDropdownChange(this)" required>
+                <!-- Disabled Option (Gradient Background) -->
+                <option value="" disabled selected 
+                    class="bg-gradient-to-r from-[#515151] to-[#676161] text-[#1A97F0] text-center font-bold">
+                    {{ buyer_username }} {{ balance }} $
+                </option>
+                
+                <option value="view_profile" class="bg-[#b3b3b3] text-white">View My Profile</option>
+                <option value="AddMonitorWallet" class="bg-[#b3b3b3] text-white">Add and Monitor Wallet</option>
+                <option value="update_pass" class="bg-[#b3b3b3] text-white">Update Password</option>
+                <option value="logout" class="bg-[#b3b3b3] text-white">Logout</option>
+            </select>
+        </div>
+    </header>
+
+
+
+
+  <!-- Update Password Modal -->
+  <div id="UpdatePasswordModal" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed inset-0 z-50 justify-center items-center flex">
+    <div class="relative p-4 w-full max-w-xl h-full md:h-auto">
+        <!-- Modal content -->
+        <div class="relative p-4 bg-white rounded-lg shadow dark:bg-gray-800 sm:p-5">
+            <!-- Modal header -->
+            <div class="flex justify-between mb-4 rounded-t sm:mb-5">
+                <div class="text-lg text-gray-900 md:text-xl dark:text-white">
+                    <h3 class="font-semibold">
+                        Update Password
+                    </h3>
+                </div>
+                <div>
+                    <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 inline-flex dark:hover:bg-gray-600 dark:hover:text-white" data-modal-toggle="UpdatePasswordModal">
+                        <svg aria-hidden="true" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+                        <span class="sr-only">Close modal</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Modal body: Update password form -->
+            <form id="updatePasswordForm" action="/update_password" method="POST" class="space-y-4">
+                <div>
+                    <label for="current-password" class="block text-sm font-medium text-gray-900 dark:text-white">Current Password</label>
+                    <input type="password" id="current-password" name="current_password" required class="mt-2 w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                </div>
+                <div>
+                    <label for="new-password" class="block text-sm font-medium text-gray-900 dark:text-white">New Password</label>
+                    <input type="password" id="new-password" name="new_password" required class="mt-2 w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                </div>
+                <div>
+                    <label for="confirm-password" class="block text-sm font-medium text-gray-900 dark:text-white">Confirm New Password</label>
+                    <input type="password" id="confirm-password" name="confirm_password" required class="mt-2 w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                </div>
+
+                <!-- Error and Success Messages -->
+                <div id="password-error" class="text-red-600 hidden">Passwords do not match.</div>
+                <div id="password-success" class="text-green-600 hidden">Password updated successfully!</div>
+
+                <div class="mt-4 flex justify-end space-x-2">
+                    <button type="button" class="px-4 py-2 bg-gray-600 text-white rounded-lg" data-modal-toggle="UpdatePasswordModal">Cancel</button>
+                    <button type="submit" id="submit-password" class="px-4 py-2 bg-blue-600 text-white rounded-lg">Update</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <section class="px-2 mt-5">
+        <div class="grid relative min-h-screen bg-blue-950 opacity-100">
+            <div class="absolute right-0 top-0 flex flex-col gap-4 p-2 items-end">
+                <div class="flex flex-row gap-4">
+                    <a href="publication_req.html">
+                        <button type="button"
+                            class="w-full lg:w-[200px] h-[45px] font-bold bg-gradient-to-r from-[#2B983F] to-[#115C1E] text-white rounded-lg">
+                            View Cart
+                        </button>
+                    </a>
+                    <a href="act_buyer_lst.html">
+                        <button type="button"
+                            class="w-full lg:w-[200px] h-[45px] font-bold bg-gradient-to-r from-[#3E7C9B] to-[#4E6C9F] text-white rounded-lg">
+                            WishList(n)
+                        </button>
+                    </a>
+                </div>
+                <!-- Search Bar -->
+                <form class="w-full max-w-md">
+                    <label for="default-search"
+                        class="mb-2 text-sm font-medium text-gray-900 sr-only dark:text-white">Search</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+                            <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true"
+                                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                                    stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z" />
+                            </svg>
+                        </div>
+                        <input type="search" id="default-search"
+                            class="block w-full p-4 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                            placeholder="Search for Games" required />
+                        <button type="submit"
+                            class="text-white absolute right-2.5 bottom-2.5 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                            Search
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div>
+
+            </div>
+            <div id="controls-carousel" class="relative mx-auto w-[80%] lg:w-[60%]" data-carousel="static">
+                <h1 class="text-3xl font-bold font-istok tracking-widest">Featured & Recommended</h1>
+                <div class="mt-5 relative h-[500px] overflow-hidden rounded-lg">
+                    <div class="hidden duration-700 ease-in-out" data-carousel-item="active">
+                        <a href="">
+                            <img src="{{ url_for('static', filename='img/The-Witcher-3.jpg') }}"
+                                class="absolute block w-full h-full object-cover -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2"
+                                alt="Slide 1">
+                        </a>
+                    </div>
+                    <div class="hidden duration-700 ease-in-out" data-carousel-item>
+                        <a href="">
+                            <img   src="{{ url_for('static', filename='img/2nd-carou.jpg') }}"
+                                class="absolute block w-full h-full object-cover -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2"
+                                alt="Slide 2">
+                        </a>
+                    </div>
+                    <div class="hidden duration-700 ease-in-out" data-carousel-item>
+                        <a href="">
+                            <img src="{{ url_for('static', filename='img/3rd-carou.jpg') }}"
+                                class="absolute block w-full h-full object-cover -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2"
+                                alt="Slide 3">
+                        </a>
+                    </div>
+                </div>
+                <!-- Left Button -->
+                <button type="button"
+    class="absolute top-1/2 left-4 z-30 flex items-center justify-center w-10 h-10 bg-black/50 hover:bg-black/70 rounded-full focus:outline-none"
+    data-carousel-prev>
+    <svg class="w-6 h-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
+        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 1 1 5l4 4" />
+    </svg>
+</button>
+                <!-- Right Button -->
+                <button type="button"
+    class="absolute top-1/2 right-4 z-30 flex items-center justify-center w-10 h-10 bg-black/50 hover:bg-black/70 rounded-full focus:outline-none"
+    data-carousel-next>
+    <svg class="w-6 h-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
+        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4" />
+    </svg>
+</button>
+
+            </div>
+        </div>
+    </section>
+
+    <script>
+
+        // Function to handle the "Update Password" modal
+        function showUpdatePasswordModal() {
+        const modal = document.getElementById('UpdatePasswordModal');
+        modal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden'; // Prevent body scrolling when modal is open
+    }
+
+    // Close the modal and reset the form if clicked outside of it
+    function initializeModal_update_password() {
+        const modal = document.getElementById('UpdatePasswordModal');
+        const closeModalButton = modal.querySelector('[data-modal-toggle="UpdatePasswordModal"]');
+        
+        closeModalButton.addEventListener('click', function() {
+            modal.classList.add('hidden');
+            document.body.style.overflow = '';
+        });
+
+        modal.addEventListener('click', function(event) {
+            if (event.target === modal) {
+                modal.classList.add('hidden');
+                document.body.style.overflow = '';
+            }
+        });
+    }
+
+    // Handle form submission for password update
+    document.getElementById('updatePasswordForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+
+        const currentPassword = document.getElementById('current-password').value;
+        const newPassword = document.getElementById('new-password').value;
+        const confirmPassword = document.getElementById('confirm-password').value;
+
+        // Check if new passwords match
+        if (newPassword !== confirmPassword) {
+            document.getElementById('password-error').classList.remove('hidden');
+            document.getElementById('password-success').classList.add('hidden');
+        } else {
+            // Send the password update request (if the new passwords match)
+            fetch('/update_password', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ current_password: currentPassword, new_password: newPassword })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('password-success').classList.remove('hidden');
+                    document.getElementById('password-error').classList.add('hidden');
+                    // Redirect to the homepage after a delay
+                    setTimeout(() => {
+                        window.location.href = '/logout';
+                    }, 2000);
+                } else {
+                    alert(data.error || 'Something went wrong!');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Something went wrong!');
+            });
+        }
+    });
+
+    // Initialize the modal functionality
+    window.addEventListener('DOMContentLoaded', function() {
+        initializeModal_update_password();
+    });
+
+
+
+
+         function handleDropdownChange(selectElement) {
+    const selectedValue = selectElement.value;
+    selectElement.value = ""; // This resets the dropdown to the placeholder option
+    
+    if (selectedValue === "logout") {
+        logout(); // Call the logout function
+    } else if (selectedValue === "AddMonitorWallet") {
+
+        pass; // changes will be made
+
+
+    } else if (selectedValue === "update_pass") {
+        showUpdatePasswordModal(); // Redirect to update password page
+    }
+    else if (selectedValue === "view_profile") {
+        window.location.href = '/ViewProfile'; // Redirect to update password page
+    }
+}
+
+
 
         // Logout function that clears the session and redirects to login
         function logout() {
-            window.location.href = '/logout';  // Redirect to logout route
+            window.location.href = '/logout'; // Redirect to logout route
         }
+        
     </script>
-
 </body>
+
 </html>

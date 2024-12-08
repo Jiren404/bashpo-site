@@ -391,7 +391,13 @@ def developer_dashboard():
 @login_required('buyer')
 def buyer_dashboard():
     # Buyer-specific logic
-    return render_template('buyer_storefront.html')
+    buyer_username=session['username']
+    with sqlite3.connect('bashpos_--definitely--_secured_database.db') as db:
+        c = db.cursor()
+        c.execute("SELECT balance FROM WALLET_BALANCE WHERE username = ?",(session['username'],))
+        balance = c.fetchone()[0]
+
+    return render_template('buyer_storefront.html', buyer_username=buyer_username,balance=balance)
 
 @app.route('/admin_dashboard')
 @login_required('admin')
