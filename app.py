@@ -115,14 +115,14 @@ def login():
     if request.method == 'GET':
         return render_template('index.html')
     
-    # If the request is a POST request (with JSON data)
+
     if request.is_json:
         data = request.json
         username = data.get('username')
         password = data.get('password')
         print(f"Username: {username}, Password: {password}")
 
-        # Authenticate user
+      
         c.execute("SELECT username, user_type FROM USERS WHERE username = ? AND password = ?", (username, password))
         user = c.fetchone()
         c.execute("SELECT username, user_type FROM USERS WHERE username = ? AND password = ? AND account_status='active'", (username, password))
@@ -131,7 +131,7 @@ def login():
 
         if user:
             if user_active_check:
-            # Set session data
+        
                 session['username'] = user[0]
                 session['user_type'] = user[1]
             else:
@@ -140,7 +140,7 @@ def login():
             return jsonify({
                 "success": True,
                 "redirect_url": url_for(f"{user[1]}_dashboard") 
-            }), 200  # 200 OK response
+            }), 200  
         else:
          
             return jsonify({"error": "Invalid credentials"}), 401  
@@ -149,7 +149,7 @@ def login():
 
 @app.route('/logout')
 def logout():
-    session.clear()  # Clear all session data
+    session.clear() 
     return redirect(url_for('login')) 
 
 
@@ -182,40 +182,39 @@ def new_account_buyer():
 
 @app.route('/forgotpass', methods=['GET'])
 def forgot_pass():
-    # Render the buyer account creation page
+
     return render_template('forgotpass.html')
 
 
 
 @app.route('/forgot_password', methods=['POST'])
 def forgot_password():
-    # Retrieve the form data (email, new password, and confirmed password)
+
     data = request.json
     email = data.get('email')
     new_password = data.get('new_password')
     confirm_password = data.get('confirm_password')
 
-    # Check if new password and confirm password match
+  
     if new_password != confirm_password:
-        return jsonify({"error": "Passwords do not match."}), 400  # 400 Bad Request
+        return jsonify({"error": "Passwords do not match."}), 400  
 
-    # Check if the email exists in the database
+   
     db = sqlite3.connect('bashpos_--definitely--_secured_database.db')
     c = db.cursor()
     c.execute("SELECT email FROM USERS WHERE email = ?", (email,))
     user = c.fetchone()
 
-    # If the email doesn't exist, return an error
-    if not user:
-        return jsonify({"error": "Email not found."}), 404  # 404 Not Found
 
-    # If email exists, update the password
+    if not user:
+        return jsonify({"error": "Email not found."}), 404  
+
     c.execute("UPDATE USERS SET password = ? WHERE email = ?", (new_password, email))
     db.commit()
     db.close()
 
-    # Return a success response
-    return jsonify({"success": "Password reset successfully."}), 200  # 200 OK
+
+    return jsonify({"success": "Password reset successfully."}), 200 
 
 
 
@@ -224,8 +223,8 @@ def forgot_password():
 
 @app.route('/devacc', methods=['GET'])
 def new_account_developer():
-    # Render the developer account creation page
-    return render_template('devacc.html')  # Replace with the actual developer signup HTML file
+ 
+    return render_template('devacc.html') 
 
 
 
@@ -233,11 +232,11 @@ def new_account_developer():
 def create_buyer():
     db=sqlite3.connect('bashpos_--definitely--_secured_database.db')
     c=db.cursor()
-    # Retrieve form data from the request
+   
     if not request.is_json:
         return jsonify({"error": "Invalid request. Please send data as JSON."}), 400
 
-    # Retrieve JSON data from the request
+   
     data = request.json
     username = data.get('user_name')
     email = data.get('email')
@@ -246,11 +245,11 @@ def create_buyer():
     store_region = data.get('store_region')
     card_info = data.get('card_info')
     print(username,email)
-    # Validate required fields
+    
     if not (username and email and password and buyer_address and store_region and card_info):
         return jsonify({"error": "All fields are required."}), 400
 
-    # Create a new User instance
+
     new_buyer = User(username, email, password, "buyer")
     new_buyer.buyer_address = buyer_address
     new_buyer.store_region = store_region
@@ -258,13 +257,11 @@ def create_buyer():
     print(new_buyer.username)
   
 
-        # If user already exists, return an error
     user_check=checkUser()  
     print(user_check)  
     if len(user_check)!=0:
         return jsonify({"error": "Username or email already exists."}), 400
 
-    # Insert new buyer into the database
     else: 
         c.execute("""
             INSERT INTO USERS (username, email, password, buyer_address, store_region, card_info, user_type,account_status)
@@ -287,11 +284,11 @@ def create_buyer():
 def create_developer():
     db=sqlite3.connect('bashpos_--definitely--_secured_database.db')
     c=db.cursor()
-    # Retrieve form data from the request
+
     if not request.is_json:
         return jsonify({"error": "Invalid request. Please send data as JSON."}), 400
 
-    # Retrieve JSON data from the request
+   
     data = request.json
     username = data.get('user_name')
     email = data.get('email')
@@ -300,11 +297,10 @@ def create_developer():
     publisher_name = data.get('publisher_name')
    
     print(username,email)
-    # Validate required fields
+   
     if not (username and email and password and company_name and publisher_name ):
         return jsonify({"error": "All fields are required."}), 400
 
-    # Create a new User instance
     new_developer = User(username, email, password, "developer")
     new_developer.company_name = company_name
     new_developer.publisher_name = publisher_name
@@ -312,13 +308,12 @@ def create_developer():
     print(new_developer.username)
   
 
-        # If user already exists, return an error
     user_check=checkUser()  
     print(user_check)  
     if len(user_check)!=0:
         return jsonify({"error": "Username or email already exists."}), 400
 
-    # Insert new buyer into the database
+ 
     else: 
         c.execute("""
             INSERT INTO USERS (username, email, password, company_name, publisher_name, user_type,account_status)
@@ -332,7 +327,6 @@ def create_developer():
         db.commit()
         db.close()
 
-    # If successful, return success response
         return jsonify({"success": "Developer account created successfully.", "redirect_url": url_for('index')}), 200
 
 
@@ -358,9 +352,9 @@ def login_required(role):
         @wraps(fn)
         def decorated_view(*args, **kwargs):
             if 'user_type' not in session:
-                return redirect(url_for('login'))  # Redirect to login if not logged in
+                return redirect(url_for('login'))  
             if session['user_type'] != role:
-                return "Unauthorized Access", 403  # Return error if role mismatch
+                return "Unauthorized Access", 403  
             return fn(*args, **kwargs)
         return decorated_view
     return wrapper
@@ -439,12 +433,12 @@ def get_active_buyers():
     with sqlite3.connect('bashpos_--definitely--_secured_database.db') as db:
         c = db.cursor()
         c.execute("SELECT username FROM USERS WHERE user_type = 'buyer' AND account_status = 'active'")
-        buyers = c.fetchall()  # This will return a list of tuples
-    return jsonify(buyers)  # Return active buyers as JSON
+        buyers = c.fetchall()  
+    return jsonify(buyers)  
 
 @app.route('/terminate_buyer', methods=['POST'])
 def terminate_buyer():
-    data = request.json  # Expecting {"username": "buyer_username"}
+    data = request.json  
     username = data.get('username')
 
     if username:
@@ -502,6 +496,7 @@ def getRequests_admin():
 
 
 @app.route('/updateRequest', methods=['POST'])
+@login_required('admin')
 def update_request():
  
     req_json = request.json
@@ -545,7 +540,7 @@ def update_password():
         db = sqlite3.connect('bashpos_--definitely--_secured_database.db')
         c = db.cursor()
 
-        # Check if the current password is correct
+        
         c.execute("SELECT password FROM USERS WHERE username = ?", (username,))
         stored_password = c.fetchone()
 
@@ -560,7 +555,7 @@ def update_password():
         else:
             return jsonify({"success": False, "error": "Incorrect current password!"})
 
-    return redirect(url_for('logout'))  # Render the password update page if GET request    
+    return redirect(url_for('logout'))
 
 if __name__=="__main__":
     app.run(debug=True, port=1097)
