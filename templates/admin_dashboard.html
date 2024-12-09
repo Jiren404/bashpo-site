@@ -38,6 +38,7 @@
             </div>
         </div>
         <div class="mt-3 lg:mt-5 lg:mr-5">
+<<<<<<< Updated upstream
     <select id="user-name" name="user_name"
             class="block rounded-lg w-full lg:w-[200px] h-[40px] bg-gradient-to-r from-[#515151] to-[#676161] text-[#1A97F0] font-bold focus:ring-2 focus:ring-white focus:text-black appearance-none"
             onchange="handleDropdownChange(this)" required>
@@ -52,6 +53,22 @@
         <option value="update_pass" class="bg-[#b3b3b3] text-white hover:bg-[#a0a0a0]">Update Password</option>
     </select>
 </div>
+=======
+            <select id="user-name" name="user_name"
+                class="block rounded-lg w-full lg:w-[200px] h-[40px] bg-gradient-to-r from-[#515151] to-[#676161] text-[#1A97F0] font-bold focus:ring-2 focus:ring-white focus:text-black appearance-none"
+                onchange="handleDropdownChange(this)" required>
+                <!-- Disabled Option (Gradient Background) -->
+                <option value="" disabled selected 
+                    class="bg-gradient-to-r from-[#515151] to-[#676161] text-[#1A97F0] text-center font-bold">
+                    {{ username }} <span class="text-base mb-5 font-bold text-white"></span>{{ balance }} $</span>
+                </option>
+                <!-- Dropdown Menu Items -->
+                <option value="view_revenue" class="bg-[#b3b3b3] text-white">View Revenue</option>
+                <option value="logout" class="bg-[#b3b3b3] text-white">Logout</option>
+                <option value="update_pass" class="bg-[#b3b3b3] text-white">Update Password</option>
+            </select>
+        </div>
+>>>>>>> Stashed changes
 
 
         <!-- Developer Revenue Modal -->
