@@ -87,6 +87,16 @@ def connect_db():
         status TEXT CHECK(status IN ('Pending', 'Accepted', 'Rejected'))
     )
 """)
+    c.execute("""
+    CREATE TABLE IF NOT EXISTS SENT_FRIEND_REQUEST (
+        username_from TEXT,
+        username_to TEXT,
+        request_status TEXT CHECK (request_status IN ('Pending', 'Accepted', 'Rejected')),
+        FOREIGN KEY (username_from) REFERENCES USERS(username),
+        FOREIGN KEY (username_to) REFERENCES USERS(username)
+    )
+""")
+
     
 
     db.commit()
@@ -390,6 +400,7 @@ def developer_dashboard():
 @app.route('/buyer_dashboard',methods=['GET','POST'])
 @login_required('buyer')
 def buyer_dashboard():
+    connect_db()
     # Buyer-specific logic
     buyer_username=session['username']
     with sqlite3.connect('bashpos_--definitely--_secured_database.db') as db:

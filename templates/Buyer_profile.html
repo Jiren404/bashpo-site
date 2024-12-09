@@ -29,12 +29,14 @@
 </head>
 
 <body class="font-inter">
-    <header class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-2 p-2 bg-base-100 rounded-lg relative">
-        
-        <div class="ml-5 lg:ml-20 mt-5 w-[80px] lg:w-[120px]">
-            <div class="bg-gradient-to-r from-sky-700 via-purple-400 to-violet-700 rounded-xl p-[2px] flex items-center">
-                <a href="/" class="block w-full h-full">
-                    <img alt="Logo" src="{{ url_for('static', filename='img/logo.jpg') }}" class="rounded-lg" />
+    <header class="flex">
+        <div class="flex navbar bg-base-100 justify-start rounded-lg">
+            <div class="ml-5 lg:ml-20 mt-5 px-0.5 py-0.5 w-[80px] lg:w-[120px] relative">
+                <div
+                    class="absolute inset-0 bg-gradient-to-r from-sky-700 via-purple-400 to-violet-700 rounded-xl p-[2px]">
+                </div>
+                <a href="/">
+                    <img alt="Tailwind CSS Navbar component" src="{{ url_for('static', filename='img/logo.jpg') }}" alt="Logo" class="rounded-lg relative z-10">
                 </a>
             </div>
         </div>
@@ -141,7 +143,7 @@
     <div
         class="box-border h-auto lg:h-[320px] w-full lg:w-[450px] p-4 border rounded-xl bg-[rgba(30,29,55,1)]">
         <p class="text-base mb-5 font-bold text-white">
-            Buyer Name: 
+            Buyer Username: 
             <span class="ml-2">{{buyer_username}}</span>
         </p>
         <p class="text-base mb-5 font-bold text-white">
@@ -205,12 +207,54 @@
                             View Owned Games
                         </button>
                     </a>
-                    <a href="publication_req.html">
-                        <button type="button"
-                            class="w-full lg:w-[300px] h-[45px] font-bold bg-gradient-to-r from-blue-900 to-purple-700 text-white rounded-lg">
-                            Send Friend Request
-                        </button>
-                    </a>
+
+<!------------------------------------------##############SEND FRIEND Request FORM MODAL################------------------------------>
+
+
+
+
+<div class="flex justify-end">
+    <button type="button" id="SendFriendReqButton" data-modal-target="#SendFriendReqModal" data-modal-toggle="SendFriendReqModal"
+            class="w-[300px] h-[45px] font-bold bg-gradient-to-r from-blue-900 to-purple-700 text-white rounded-lg">
+        Send Friend Request
+    </button>
+</div>
+
+<!-- Modal for sending publication request -->
+<div id="SendFriendReqModal" class="hidden fixed top-0 left-0 w-full h-full bg-gray-800 bg-opacity-50 flex items-center justify-center z-50">
+    <div class="relative p-4 bg-white rounded-lg shadow dark:bg-gray-800 sm:p-5">
+        <div class="flex justify-between mb-4 rounded-t sm:mb-5">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Send Friend Request</h3>
+            <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 dark:hover:bg-gray-600 dark:hover:text-white"
+                data-modal-toggle="SendFriendReqModal">
+                <svg aria-hidden="true" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                </svg>
+                <span class="sr-only">Close modal</span>
+            </button>
+        </div>
+
+        <!-- Modal body: send request form -->
+        <form id="SendFriendReqForm" action="/SendFriendRequest" method="POST" class="space-y-4">
+            <!-- Form fields for game name, genre, etc. -->
+            <div>
+                <label for="email" class="block text-sm font-medium text-gray-900 dark:text-white">Enter Friend's email:</label>
+                <input type="text" id="email" name="email" required class="mt-2 w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter friend's email....."/>
+            </div>
+            
+            <div class="mt-4 flex justify-end space-x-2">
+                <button type="submit" id="submitSendFriendReq" class="px-4 py-2 bg-blue-600 text-white rounded-lg">Send Request</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+
+
+
+
+     <!---------------------------------#################-END of send friend request form modal######################-------------------->               
                     <a href="act_buyer_lst.html">
                         <button type="button"
                             class="w-full lg:w-[300px] h-[45px] font-bold bg-gradient-to-r from-blue-900 to-purple-700 text-white rounded-lg">
@@ -319,6 +363,85 @@
         window.location.href = '/ViewMyProfile'; // Redirect to update password page
     }
 }
+
+
+ //////////////////////form for publishing/////////////////////////////////////////////////////////////////////
+
+
+    // Function to handle the "Update Password" modal
+    function showSendFriendReqModal() {
+        const modal = document.getElementById('SendFriendReqModal');
+        modal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden'; // Prevent body scrolling when modal is open
+    }
+
+    // Close the modal and reset the form if clicked outside of it
+    function initializeModal_SendFriendReqModal() {
+        const modal = document.getElementById('SendFriendReqModal');
+    const openButton = document.getElementById('SendFriendReqButton');
+    const closeButton = modal.querySelector('[data-modal-toggle="SendFriendReqModal"]');
+
+    // Open modal
+    openButton.addEventListener('click', () => {
+        modal.classList.remove('hidden');
+    });
+
+    // Close modal
+    closeButton.addEventListener('click', () => {
+        modal.classList.add('hidden');
+    });
+
+    // Close modal when clicking outside
+    window.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.classList.add('hidden');
+        }
+        });
+    }
+
+    // Handle form submission for password update
+    document.getElementById('SendFriendReqForm').addEventListener('submit', function(event) {
+    event.preventDefault();
+
+    const email = document.getElementById('email').value;
+   
+    
+    console.log(email);
+
+    // Send the request
+    fetch('/SendFriendRequest', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+            email: email
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message);
+            // Redirect to the homepage after a delay
+
+        setTimeout(() => {
+            window.location.href = '/';
+        }, 2000);
+    } else {
+        alert(data.message);
+    }
+})
+.catch(error => {
+    console.error('Error:', error);
+    alert('Something went wrong!');
+});
+        
+    });
+    window.addEventListener('DOMContentLoaded', function() {
+        initializeModal_SendFriendReqModal();
+      
+
+    });
 
 function toggleCardInfo() {
     const masked = document.getElementById("maskedCardInfo");

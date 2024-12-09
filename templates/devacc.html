@@ -28,16 +28,17 @@
 <body class="font-inter">
     <header>
         <div class="navbar bg-base-100 justify-start rounded-lg">
-            <div class="ml-5 lg:ml-20 mt-5 w-[80px] lg:w-[120px] relative">
+            <div class="ml-5 lg:ml-20 mt-5 px-0.5 py-0.5 w-[80px] lg:w-[120px] relative">
                 <div
-                    class="absolute inset-0 bg-gradient-to-r from-sky-500 via-purple-500 to-pink-500 rounded-xl p-[2px]">
+                    class="absolute inset-0 bg-gradient-to-r from-sky-700 via-purple-400 to-violet-700 rounded-xl p-[2px]">
                 </div>
                 <a href="/">
-                    <img alt="Tailwind CSS Navbar component" src="{{ url_for('static', filename='img/logo.jpg') }}" class="rounded-lg relative z-10">
+                    <img alt="Tailwind CSS Navbar component" src="{{ url_for('static', filename='img/logo.jpg') }}" alt="Logo" class="rounded-lg relative z-10">
                 </a>
             </div>
         </div>
     </header>
+
 
     <section class="flex mt-5 flex-col md:flex-row">
         <div class="bg-gradient-to-r from-blue-800 to-blue-900 pr-20 md:w-1/2">
