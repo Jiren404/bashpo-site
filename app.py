@@ -520,8 +520,14 @@ def Send_Friend_Request():
         req_json = request.json
         friend_email=req_json.get('email')
         sender_username=session['username']
-        c.execute("SELECT username FROM USERS where email=?",(friend_email,))
-        friend_username=c.fetchone()[0]
+        c.execute("SELECT username FROM USERS where email=? and user_type='buyer'",(friend_email,))
+        friend_username=c.fetchone()
+        if  friend_username==None:
+            return jsonify({"success": False, "message": "This email doesn't belong to a buyer or doesn't exist"})
+        else:
+            friend_username=friend_username[0]   
+        if friend_username==session['username']:
+             return jsonify({"success": False, "message": "You cannot send a friend request to yourself"})
         print(friend_username)
         #checking if a request is pending or accepted
         c.execute("SELECT request_status FROM SENT_FRIEND_REQUEST WHERE username_from=? and username_to=? and request_status!='Rejected'",(sender_username,friend_username))
