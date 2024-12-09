@@ -96,6 +96,15 @@ def connect_db():
         FOREIGN KEY (username_to) REFERENCES USERS(username)
     )
 """)
+    c.execute("""
+    CREATE TABLE IF NOT EXISTS FRIENDS (
+        username_me TEXT,
+        username_friendswith TEXT,
+        
+        FOREIGN KEY (username_me) REFERENCES USERS(username),
+        FOREIGN KEY (username_friendswith) REFERENCES USERS(username)
+    )
+""")
 
     
 
@@ -385,8 +394,10 @@ def developer_dashboard():
         c.execute("SELECT balance FROM WALLET_BALANCE WHERE username = ?",(session['username'],))
         balance = c.fetchone()[0]
 
-        c.execute("SELECT game_name, status from GAME_PUBLISH_REQUEST WHERE username=? and status!='Pending'",(session['username'],))
+        c.execute("SELECT game_name, status from GAME_PUBLISH_REQUEST WHERE username=?",(session['username'],))
         game_req_data = c.fetchall()
+        
+        
 
         # c.execute("SELECT COUNT(*) FROM USERS WHERE user_type ='buyer' and account_status = 'terminated'")
         # terminated_users = c.fetchone()[0]
@@ -426,9 +437,12 @@ def buyer_profile():
         buyer_details=c.fetchone()
         status=buyer_details[5].upper()
         card_info=str(buyer_details[4])
+        c.execute("SELECT username_from FROM SENT_FRIEND_REQUEST where username_to=? and request_status='Pending'",(session['username'],))
+        pending_requests=c.fetchall()
+        c.execute("SELECT username_friendswith FROM FRIENDS where username_me=?",(session['username'],))
+        my_friends=c.fetchall()
 
-
-    return render_template('Buyer_profile.html',balance=balance,buyer_username=buyer_username,buyer_data=buyer_details,account_status=status,card_info=card_info)
+    return render_template('Buyer_profile.html',balance=balance,buyer_username=buyer_username,buyer_data=buyer_details,account_status=status,card_info=card_info,pending_requests=pending_requests,my_friends=my_friends)
 
 
 
@@ -495,6 +509,69 @@ def terminate_buyer():
 
 
 
+
+
+@app.route('/SendFriendRequest', methods=['GET','POST'])
+@login_required('buyer')
+def Send_Friend_Request():
+     if request.method == 'POST':
+        db=sqlite3.connect("bashpos_--definitely--_secured_database.db")
+        c=db.cursor()
+        req_json = request.json
+        friend_email=req_json.get('email')
+        sender_username=session['username']
+        c.execute("SELECT username FROM USERS where email=?",(friend_email,))
+        friend_username=c.fetchone()[0]
+        print(friend_username)
+        #checking if a request is pending or accepted
+        c.execute("SELECT request_status FROM SENT_FRIEND_REQUEST WHERE username_from=? and username_to=? and request_status!='Rejected'",(sender_username,friend_username))
+        check_duplicate=c.fetchall()
+        c.execute("SELECT request_status FROM SENT_FRIEND_REQUEST WHERE username_from=? and username_to=? and request_status!='Rejected'",(friend_username,sender_username))
+        check_duplicate_2=c.fetchall()
+        if len(check_duplicate)!=0:
+            return jsonify({"success": False, "message": "Cannot send friend request as currently a request is "+check_duplicate[0][0]})
+        elif len(check_duplicate_2)!=0:
+            return jsonify({"success": False, "message": "Cannot send friend request as currently a request is "+check_duplicate_2[0][0]})
+        else:
+            c.execute("INSERT INTO SENT_FRIEND_REQUEST VALUES (?,?,?)",(sender_username,friend_username,'Pending'))
+            db.commit()
+            return jsonify({"success": True, "message": "Friend Request sent succesfully"})
+
+
+@app.route('/updateFriendRequest', methods=['POST'])
+@login_required('buyer')
+def update_FriendRequest():
+ 
+    req_json = request.json
+    friends_username = req_json.get('username_from')
+    status = req_json.get('request_status')
+
+    if not friends_username or status not in ['Accepted', 'Rejected']:
+        return jsonify({"response": "Invalid request data"}), 400
+    db = sqlite3.connect('bashpos_--definitely--_secured_database.db')
+    c = db.cursor()
+    c.execute(
+        "UPDATE SENT_FRIEND_REQUEST SET request_status=? WHERE username_from=? and username_to=?",
+        (status, friends_username,session['username']),
+    )
+    if status=='Accepted':
+        c.execute("INSERT INTO FRIENDS VALUES (?,?)",(session['username'],friends_username))
+        db.commit()
+        c.execute("INSERT INTO FRIENDS VALUES (?,?)",(friends_username,session['username']))
+    db.commit()
+    return jsonify({"message": "Request updated to "+status})        
+
+
+@app.route('/ViewFriendProfile/<friend_username>')
+def view_friend_profile(friend_username):
+     with sqlite3.connect('bashpos_--definitely--_secured_database.db') as db:
+        c = db.cursor()
+        c.execute("SELECT balance FROM WALLET_BALANCE WHERE username = ?",(session['username'],))
+        balance = c.fetchone()[0]
+        c.execute("SELECT email,account_status FROM USERS WHERE username=?",(friend_username,))
+        friend_data=c.fetchone()
+        # Pass the friend's username to the template
+        return render_template('ViewFriendProfile.html', friendusername=friend_username,buyer_username=session['username'],balance=balance,friend_email=friend_data[0],friend_account_status=friend_data[1].upper())
 
 
 

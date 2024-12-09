@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Developer Dashboard</title>
+    <title>{{buyer_username}}'s Profile</title>
     <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css" rel="stylesheet" type="text/css" />
     <script>
         tailwind.config = {
@@ -29,7 +29,7 @@
 </head>
 
 <body class="font-inter">
-    <header class="flex">
+    <header class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-2 p-2 bg-base-100 rounded-lg">
         <div class="flex navbar bg-base-100 justify-start rounded-lg">
             <div class="ml-5 lg:ml-20 mt-5 px-0.5 py-0.5 w-[80px] lg:w-[120px] relative">
                 <div
@@ -40,7 +40,7 @@
                 </a>
             </div>
         </div>
-        <div class="mt-3 lg:mt-0 lg:mr-5">
+        <div class="mt-3 lg:mt-5 lg:mr-5">
             <select id="user-name" name="user_name"
                 class="block rounded-lg w-full lg:w-[200px] h-[40px] bg-gradient-to-r from-[#515151] to-[#676161] text-[#1A97F0] font-bold focus:ring-2 focus:ring-white focus:text-black appearance-none"
                 onchange="handleDropdownChange(this)" required>
@@ -134,7 +134,7 @@
             class="gap-5 absolute bg-[url('{{ url_for('static', filename='img/bg-1.jpg') }}')] bg-cover bg-center w-full min-h-screen bg-blue-600 opacity-80 z-0">
             <div class="mt-5">
                 <h1
-  class="w-auto px-4 lg:w-[450px] mx-auto lg:mx-20 text-xl sm:text-2xl lg:text-4xl font-bold my-5 text-white text-center font-istok tracking-5pct">
+  class="w-auto px-4 lg:w-[500px] mx-auto lg:mx-20 text-xl sm:text-2xl lg:text-4xl font-bold my-5 text-white text-center font-istok tracking-10pct">
   {{buyer_username}}'s General Info
 </h1>
             </div>
@@ -254,16 +254,154 @@
 
 
 
-     <!---------------------------------#################-END of send friend request form modal######################-------------------->               
-                    <a href="act_buyer_lst.html">
-                        <button type="button"
+     <!---------------------------------#################-END of send friend request form modal######################-------------------->
+     
+     
+     <!--##################################View and respond to Friend Request##############################################################-->
+
+
+
+
+
+                    <button type="button" id="ViewFriendReqButton" data-modal-target="ViewFriendReqModal" data-modal-toggle="ViewFriendReqModal"
                             class="w-full lg:w-[300px] h-[45px] font-bold bg-gradient-to-r from-blue-900 to-purple-700 text-white rounded-lg">
-                           View Friend Requests </button>
-                    <a href="act_buyer_lst.html">
-                        <button type="button"
+                            View Pending Friend Requests
+                        </button>
+                        <!-- Main modal -->
+<!-- Main modal -->
+<div id="ViewFriendReqModal" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed inset-0 z-50 justify-center items-center flex">
+    <div class="relative p-4 w-full max-w-xl h-full md:h-auto">
+        <!-- Modal content -->
+        <div class="relative p-4 bg-white rounded-lg shadow dark:bg-gray-800 sm:p-5">
+            <!-- Modal header -->
+            <div class="flex justify-between mb-4 rounded-t sm:mb-5">
+                <div class="text-lg text-gray-900 md:text-xl dark:text-white">
+                    <h3 class="font-semibold">
+                        Pending Friend Requests
+                    </h3>
+                </div>
+                <div>
+                    <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 inline-flex dark:hover:bg-gray-600 dark:hover:text-white" data-modal-toggle="ViewFriendReqModal">
+                        <svg aria-hidden="true" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+                        <span class="sr-only">Close modal</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Search Bar -->
+            
+
+            <!-- Display list of active buyers -->
+            <div class="mt-4">
+                <ul id="friendrequest" class="list-disc pl-5 space-y-4"> <!-- Added spacing between list items -->
+                    {% for friend_request in pending_requests %}
+                        <li class="flex items-center justify-between mb-4 p-4 border-gray-300 rounded-lg bg-transparent"> <!-- Removed white background -->
+                            <!-- Request details -->
+                            <div class="flex flex-col space-y-1">
+                                <span class="text-gray-700 font-medium text-white">{{friend_request[0]}}</span>
+
+                            </div>
+            
+                            <!-- Action buttons -->
+                            <div class="flex space-x-3">
+                                <!-- Accept Button -->
+                                <button type="button" 
+                                    class="text-white bg-green-600 hover:bg-green-700 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-xs px-4 py-2 dark:bg-green-500 dark:hover:bg-green-600 dark:focus:ring-green-900" 
+                                    data-request_id="{{ friend_request[0] }}" 
+                                    data-status="Accepted" 
+                                    onclick="updateFriendRequest(this)">
+                                    Accept
+                                </button>
+                                <!-- Reject Button -->
+                                <button type="button" 
+                                    class="text-white bg-red-600 hover:bg-red-700 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-xs px-4 py-2 dark:bg-red-500 dark:hover:bg-red-600 dark:focus:ring-red-900" 
+                                    data-request_id="{{ friend_request[0] }}" 
+                                    data-status="Rejected" 
+                                    onclick="updateFriendRequest(this)">
+                                    Reject
+                                </button>
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+<!--####################################################END OF VIEW and Repond to Friend Request####################################################-->
+
+
+<!--############################View Friend Requests and their profiles#########################################-->
+                    <button type="button" id="ViewFriendListButton" data-modal-target="ViewFriendListModal" data-modal-toggle="ViewFriendListModal"
                             class="w-full lg:w-[300px] h-[45px] font-bold bg-gradient-to-r from-blue-900 to-purple-700 text-white rounded-lg">
-                           View Friend list </button>
-                    </a>
+                            View Friend List
+                        </button>
+                        <!-- Main modal -->
+<!-- Main modal -->
+<div id="ViewFriendListModal" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed inset-0 z-50 justify-center items-center flex">
+    <div class="relative p-4 w-full max-w-xl h-full md:h-auto">
+        <!-- Modal content -->
+        <div class="relative p-4 bg-white rounded-lg shadow dark:bg-gray-800 sm:p-5">
+            <!-- Modal header -->
+            <div class="flex justify-between mb-4 rounded-t sm:mb-5">
+                <div class="text-lg text-gray-900 md:text-xl dark:text-white">
+                    <h3 class="font-semibold">
+                        Friend list
+                    </h3>
+                </div>
+                <div>
+                    <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 inline-flex dark:hover:bg-gray-600 dark:hover:text-white" data-modal-toggle="ViewFriendListModal">
+                        <svg aria-hidden="true" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+                        <span class="sr-only">Close modal</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Search Bar -->
+            <div class="mb-4">
+                <input type="text" id="searchInput_friend" placeholder="Search by username..." class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring focus:border-blue-300">
+            </div>
+
+            <!-- Display list of active buyers -->
+            <div class="mt-4">
+                <ul id="buyerList" class="list-disc pl-5">
+                    {% for friend in my_friends %}
+                        <li class="flex items-center justify-between mb-4">
+                            <span class="buyer-username">{{ friend[0] }}</span> <!-- Display the username -->
+                            <button type="button"
+                            class="text-white bg-blue-400 hover:bg-blue-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-1.5 text-center dark:bg-blue-500 dark:hover:bg-blue-600 dark:focus:ring-blue-700"
+                            data-friendusername="{{ friend[0] }}"
+                            onclick="ViewFriendProfile(this)">
+                            View Profile
+                        </button>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
+                    
                 </div>
             </div>
         </div>
@@ -425,7 +563,7 @@
             // Redirect to the homepage after a delay
 
         setTimeout(() => {
-            window.location.href = '/';
+            window.location.href = '/ViewMyProfile';
         }, 2000);
     } else {
         alert(data.message);
@@ -437,9 +575,96 @@
 });
         
     });
+    function showViewFriendReqModal() {
+        const modal = document.getElementById('ViewFriendReqModal');
+        modal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden'; // Prevent body scrolling when modal is open
+    }
+
+  // Function to initialize modal functionality
+  function initializeModal_ViewFriendReq() {
+    const openModalButton = document.getElementById('ViewFriendReqButton');
+    const modal = document.getElementById('ViewFriendReqModal');
+    const closeModalButton = modal.querySelector('[data-modal-toggle="ViewFriendReqModal"]');
+    
+    // Open the modal when the button is clicked
+    openModalButton.addEventListener('click', function() {
+      modal.classList.remove('hidden'); // Show the modal
+      document.body.style.overflow = 'hidden'; // Prevent body scrolling when modal is open
+    });
+
+    // Close the modal when the close button (X) is clicked
+    closeModalButton.addEventListener('click', function() {
+      modal.classList.add('hidden'); // Hide the modal
+      document.body.style.overflow = ''; // Re-enable body scrolling
+    });
+
+    // Close the modal if the user clicks outside of the modal content (overlay click)
+    modal.addEventListener('click', function(event) {
+      if (event.target === modal) {
+        modal.classList.add('hidden');
+        document.body.style.overflow = '';
+      }
+    });
+  }
+
+
+
+  function initializeSearch_ViewFriendListModal() {
+    const searchInput = document.getElementById('searchInput_friend');
+    const userList = document.querySelectorAll('#ViewFriendListModal ul li'); // Correct selector
+
+    searchInput.addEventListener('input', function () {
+        const filter = searchInput.value.toLowerCase();
+
+        userList.forEach((userItem) => {
+            const username = userItem.querySelector('.buyer-username').textContent.toLowerCase();
+
+            // Show or hide the user based on the search input
+            if (username.includes(filter)) {
+                userItem.style.display = ''; // Show
+            } else {
+                userItem.style.display = 'none'; // Hide
+            }
+        });
+    });
+}
+ // Function to initialize modal functionality
+ function initializeModal_ViewFriendList() {
+    const openModalButton = document.getElementById('ViewFriendListButton');
+    const modal = document.getElementById('ViewFriendListModal');
+    const closeModalButton = modal.querySelector('[data-modal-toggle="ViewFriendListModal"]');
+    
+    // Open the modal when the button is clicked
+    openModalButton.addEventListener('click', function() {
+      modal.classList.remove('hidden'); // Show the modal
+      document.body.style.overflow = 'hidden'; // Prevent body scrolling when modal is open
+    });
+
+    // Close the modal when the close button (X) is clicked
+    closeModalButton.addEventListener('click', function() {
+      modal.classList.add('hidden'); // Hide the modal
+      document.body.style.overflow = ''; // Re-enable body scrolling
+    });
+
+    // Close the modal if the user clicks outside of the modal content (overlay click)
+    modal.addEventListener('click', function(event) {
+      if (event.target === modal) {
+        modal.classList.add('hidden');
+        document.body.style.overflow = '';
+      }
+    });
+  }
+
+
+
+
+    
     window.addEventListener('DOMContentLoaded', function() {
         initializeModal_SendFriendReqModal();
-      
+        initializeModal_ViewFriendReq();
+        initializeModal_ViewFriendList() ;
+        initializeSearch_ViewFriendListModal();
 
     });
 
@@ -459,6 +684,37 @@ function toggleCardInfo() {
         toggleButton.innerText = "Show";
     }
 }
+function updateFriendRequest(button) {
+        const username_from = button.getAttribute('data-request_id');
+        const request_status= button.getAttribute('data-status');
+
+        fetch('/updateFriendRequest', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ username_from:username_from,request_status:request_status })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.message) {
+                alert(data.message); // Display success message
+                button.closest('li').remove(); // Remove the user from the list
+                window.location.href = "/ViewMyProfile";
+            } else {
+                alert(data.error); // Display error message
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Something went wrong!');
+        });
+        
+    }
+    function ViewFriendProfile(button) {
+        const friend_username = button.getAttribute('data-friendusername');
+        window.location.href = `/ViewFriendProfile/${friend_username}`;
+    }
 
 
 
