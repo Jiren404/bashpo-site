@@ -138,6 +138,7 @@ def login():
         c.execute("SELECT username, user_type FROM USERS WHERE username = ? AND password = ? AND account_status='active'", (username, password))
         user_active_check = c.fetchone()
         print("Fetched user:", user)
+        print(user_active_check)
 
         if user:
             if user_active_check:
@@ -480,7 +481,9 @@ def get_active_buyers():
     return jsonify(buyers)  
 
 @app.route('/terminate_buyer', methods=['POST'])
+@login_required('admin')
 def terminate_buyer():
+    
     data = request.json  
     username = data.get('username')
 
