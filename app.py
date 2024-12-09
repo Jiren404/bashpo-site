@@ -360,7 +360,7 @@ def login_required(role):
     return wrapper
 
 
-@app.route('/dev_dashboard')
+@app.route('/dev_dashboard', methods=['GET','POST'])
 @login_required('developer')
 def developer_dashboard():
     connect_db()
@@ -387,7 +387,7 @@ def developer_dashboard():
     return render_template('dev_dashboard.html',dev_username=dev_username, balance=balance,company_name=company_name,
                            publisher_name=publisher_name.upper(),dev_email=dev_email,game_req_data=game_req_data)
 
-@app.route('/buyer_dashboard')
+@app.route('/buyer_dashboard',methods=['GET','POST'])
 @login_required('buyer')
 def buyer_dashboard():
     # Buyer-specific logic
@@ -396,8 +396,34 @@ def buyer_dashboard():
         c = db.cursor()
         c.execute("SELECT balance FROM WALLET_BALANCE WHERE username = ?",(session['username'],))
         balance = c.fetchone()[0]
+        
 
     return render_template('buyer_storefront.html', buyer_username=buyer_username,balance=balance)
+
+
+
+
+@app.route('/ViewMyProfile',methods=['GET','POST'])
+@login_required('buyer')
+def buyer_profile():
+    buyer_username=session['username']
+    with sqlite3.connect('bashpos_--definitely--_secured_database.db') as db:
+        c = db.cursor()
+        c.execute("SELECT balance FROM WALLET_BALANCE WHERE username = ?",(session['username'],))
+        balance = c.fetchone()[0]
+        c.execute("SELECT username,email,buyer_address,store_region,card_info, account_status FROM USERS where username=?",(session['username'],))
+        buyer_details=c.fetchone()
+        status=buyer_details[5].upper()
+        card_info=str(buyer_details[4])
+
+
+    return render_template('Buyer_profile.html',balance=balance,buyer_username=buyer_username,buyer_data=buyer_details,account_status=status,card_info=card_info)
+
+
+
+
+
+
 
 @app.route('/admin_dashboard')
 @login_required('admin')

@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Bashpo Home</title>
+    <title>Developer Dashboard</title>
     <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css" rel="stylesheet" type="text/css" />
     <script>
         tailwind.config = {
@@ -18,19 +18,16 @@
         }
     </script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/1.6.0/flowbite.min.js"></script>
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Manrope:wght@200..800&display=swap"
         rel="stylesheet" />
 </head>
 
 <body class="font-inter">
-    <!-- Header Section -->
-    <header
-        class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-2 p-2 bg-base-100 rounded-lg">
+    <header class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-2 p-2 bg-base-100 rounded-lg relative">
+        
         <div class="ml-5 lg:ml-20 mt-5 w-[80px] lg:w-[120px]">
-            <div
-                class="bg-gradient-to-r from-sky-700 via-purple-400 to-violet-700 rounded-xl p-[2px] flex items-center">
+            <div class="bg-gradient-to-r from-sky-700 via-purple-400 to-violet-700 rounded-xl p-[2px] flex items-center">
                 <a href="/" class="block w-full h-full">
                     <img alt="Logo" src="{{ url_for('static', filename='img/logo.jpg') }}" class="rounded-lg" />
                 </a>
@@ -57,8 +54,10 @@
 
 
 
-  <!-- Update Password Modal -->
-  <div id="UpdatePasswordModal" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed inset-0 z-50 justify-center items-center flex">
+
+
+<!-- Update Password Modal -->
+<div id="UpdatePasswordModal" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed inset-0 z-50 justify-center items-center flex">
     <div class="relative p-4 w-full max-w-xl h-full md:h-auto">
         <!-- Modal content -->
         <div class="relative p-4 bg-white rounded-lg shadow dark:bg-gray-800 sm:p-5">
@@ -120,91 +119,103 @@
 
 
 
-    <section class="px-2 mt-5">
-        <div class="grid relative min-h-screen bg-blue-950 opacity-100">
-            <div class="absolute right-0 top-0 flex flex-col gap-4 p-2 items-end">
-                <div class="flex flex-row gap-4">
+
+
+
+    <section class="mt-5">
+        <div
+            class="gap-5 absolute bg-[url('{{ url_for('static', filename='img/bg-1.jpg') }}')] bg-cover bg-center w-full min-h-screen bg-blue-600 opacity-80 z-0">
+            <div class="mt-5">
+                <h1
+                    class="w-auto px-4 lg:w-[450px] mx-auto lg:mx-20 text-xl sm:text-2xl lg:text-4xl font-bold my-5 text-white text-center">
+                    {{buyer_username}}'s General Info
+                </h1>
+            </div>
+            <div
+    class="flex flex-col lg:flex-row justify-between items-start lg:items-center mx-4 lg:mx-20 space-y-6 lg:space-y-0">
+    <div
+        class="box-border h-auto lg:h-[320px] w-full lg:w-[450px] p-4 border rounded-xl bg-[rgba(30,29,55,1)]">
+        <p class="text-base mb-5 font-bold text-white">
+            Buyer Name: 
+            <span class="ml-2">{{buyer_username}}</span>
+        </p>
+        <p class="text-base mb-5 font-bold text-white">
+            Email: 
+            <span class="ml-2">{{buyer_data[1]}}</span>
+        </p>
+        <p class="text-base mb-5 font-bold text-white">
+            Address: 
+            <span class="ml-2">{{buyer_data[2]}}</span>
+        </p>
+        <p class="text-base mb-5 font-bold text-white">
+            Store Region: 
+            <span class="ml-2">{{buyer_data[3]}}</span>
+        </p>
+        <p class="text-base mb-5 font-bold text-white">
+            Card Info: 
+            <span class="ml-2 relative">
+                <!-- Masked Card Info -->
+                <span id="maskedCardInfo" class="text-gray-400 tracking-widest">**** **** **** {{card_info[-4:]}}</span>
+                
+                <!-- Full Card Info (hidden initially) -->
+                <span id="fullCardInfo" class="hidden text-green-500 tracking-widest">{{card_info}}</span>
+                
+                <!-- Toggle Button -->
+                <button
+                    type="button"
+                    class="ml-4 text-sm text-blue-500 hover:underline focus:outline-none"
+                    onclick="toggleCardInfo()">
+                    Show
+                </button>
+            </span>
+        </p>
+        <p class="text-base mb-5 font-bold text-white">
+            Account Status: 
+            <span class="ml-2 text-green-500">{{account_status}}</span>
+        </p>
+    </div>
+</div>
+
+
+                <div class="grid gap-4 w-full lg:w-auto">
+                    <div class="absolute right-0 top-0 flex flex-col gap-4 p-2 items-end">
+                        <div class="flex flex-row gap-4">
+                            <a href="publication_req.html">
+                                <button type="button"
+                                    class="w-full lg:w-[200px] h-[45px] font-bold bg-gradient-to-r from-[#2B983F] to-[#115C1E] text-white rounded-lg">
+                                    View Cart
+                                </button>
+                            </a>
+                            <a href="act_buyer_lst.html">
+                                <button type="button"
+                                    class="w-full lg:w-[200px] h-[45px] font-bold bg-gradient-to-r from-[#3E7C9B] to-[#4E6C9F] text-white rounded-lg">
+                                    WishList(n)
+                                </button>
+                            </a>
+                        </div>
+                    
                     <a href="publication_req.html">
                         <button type="button"
-                            class="w-full lg:w-[200px] h-[45px] font-bold bg-gradient-to-r from-[#2B983F] to-[#115C1E] text-white rounded-lg">
-                            View Cart
+                            class="w-full lg:w-[300px] h-[45px] font-bold bg-gradient-to-r from-blue-900 to-purple-700 text-white rounded-lg">
+                            View Owned Games
+                        </button>
+                    </a>
+                    <a href="publication_req.html">
+                        <button type="button"
+                            class="w-full lg:w-[300px] h-[45px] font-bold bg-gradient-to-r from-blue-900 to-purple-700 text-white rounded-lg">
+                            Send Friend Request
                         </button>
                     </a>
                     <a href="act_buyer_lst.html">
                         <button type="button"
-                            class="w-full lg:w-[200px] h-[45px] font-bold bg-gradient-to-r from-[#3E7C9B] to-[#4E6C9F] text-white rounded-lg">
-                            WishList(n)
-                        </button>
+                            class="w-full lg:w-[300px] h-[45px] font-bold bg-gradient-to-r from-blue-900 to-purple-700 text-white rounded-lg">
+                           View Friend Requests </button>
+                    <a href="act_buyer_lst.html">
+                        <button type="button"
+                            class="w-full lg:w-[300px] h-[45px] font-bold bg-gradient-to-r from-blue-900 to-purple-700 text-white rounded-lg">
+                           View Friend list </button>
                     </a>
                 </div>
-                <!-- Search Bar -->
-                <form class="w-full max-w-md">
-                    <label for="default-search"
-                        class="mb-2 text-sm font-medium text-gray-900 sr-only dark:text-white">Search</label>
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-                            <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true"
-                                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
-                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                                    stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z" />
-                            </svg>
-                        </div>
-                        <input type="search" id="default-search"
-                            class="block w-full p-4 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                            placeholder="Search for Games" required />
-                        <button type="submit"
-                            class="text-white absolute right-2.5 bottom-2.5 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-                            Search
-                        </button>
-                    </div>
-                </form>
-            </div>
-
-            <div>
-
-            </div>
-            <div id="controls-carousel" class="relative mx-auto w-[80%] lg:w-[60%]" data-carousel="static">
-                <h1 class="text-3xl font-bold font-istok tracking-widest">Featured & Recommended</h1>
-                <div class="mt-5 relative h-[500px] overflow-hidden rounded-lg">
-                    <div class="hidden duration-700 ease-in-out" data-carousel-item="active">
-                        <a href="">
-                            <img src="{{ url_for('static', filename='img/The-Witcher-3.jpg') }}"
-                                class="absolute block w-full h-full object-cover -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2"
-                                alt="Slide 1">
-                        </a>
-                    </div>
-                    <div class="hidden duration-700 ease-in-out" data-carousel-item>
-                        <a href="">
-                            <img   src="{{ url_for('static', filename='img/2nd-carou.jpg') }}"
-                                class="absolute block w-full h-full object-cover -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2"
-                                alt="Slide 2">
-                        </a>
-                    </div>
-                    <div class="hidden duration-700 ease-in-out" data-carousel-item>
-                        <a href="">
-                            <img src="{{ url_for('static', filename='img/3rd-carou.jpg') }}"
-                                class="absolute block w-full h-full object-cover -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2"
-                                alt="Slide 3">
-                        </a>
-                    </div>
-                </div>
-                <!-- Left Button -->
-                <button type="button"
-    class="absolute top-1/2 left-4 z-30 flex items-center justify-center w-10 h-10 bg-black/50 hover:bg-black/70 rounded-full focus:outline-none"
-    data-carousel-prev>
-    <svg class="w-6 h-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
-        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 1 1 5l4 4" />
-    </svg>
-</button>
-                <!-- Right Button -->
-                <button type="button"
-    class="absolute top-1/2 right-4 z-30 flex items-center justify-center w-10 h-10 bg-black/50 hover:bg-black/70 rounded-full focus:outline-none"
-    data-carousel-next>
-    <svg class="w-6 h-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
-        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4" />
-    </svg>
-</button>
-
             </div>
         </div>
     </section>
@@ -304,12 +315,34 @@
     }
 }
 
+function toggleCardInfo() {
+    const masked = document.getElementById("maskedCardInfo");
+    const full = document.getElementById("fullCardInfo");
+    const toggleButton = event.target;
+
+    // Toggle visibility
+    if (full.classList.contains("hidden")) {
+        masked.classList.add("hidden");
+        full.classList.remove("hidden");
+        toggleButton.innerText = "Hide";
+    } else {
+        full.classList.add("hidden");
+        masked.classList.remove("hidden");
+        toggleButton.innerText = "Show";
+    }
+}
+
+
+
+
 
 
         // Logout function that clears the session and redirects to login
         function logout() {
             window.location.href = '/logout'; // Redirect to logout route
         }
+
+        
         
     </script>
 </body>
