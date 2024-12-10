@@ -2,9 +2,14 @@ from flask import *
 import sqlite3
 import uuid
 from functools import wraps
+import base64
+import os
 
 app=Flask(__name__)
 app.secret_key = 'your-secret-key'  # Replace with a strong, unique key
+UPLOAD_FOLDER = 'static/uploads'
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)  # Create the folder if it doesn't exist
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 
 class User:
@@ -22,13 +27,25 @@ class User:
 
 class Game_publish_request:
       def __init__(self,game_name,game_genre,estimated_release_year,basic_description):
+   
             self.request_id=uuid.uuid4().hex
             self.username=''
             self.game_name=game_name
             self.game_genre=game_genre
             self.estimated_release_year=estimated_release_year
             self.basic_description=basic_description
-            self.status='Pending'        
+            self.status='Pending'  
+
+class Games_List:
+    def __init__(self,game_name,game_genre,game_description,base_price):
+        self.game_name=game_name
+        self.game_genre=game_genre
+        self.game_description=game_description
+        self.base_price=base_price
+
+
+
+          
 
 def connect_db():
     db=sqlite3.connect('bashpos_--definitely--_secured_database.db')
@@ -84,7 +101,7 @@ def connect_db():
         game_genre TEXT, 
         estimated_release_year INT(4), 
         basic_description TEXT, 
-        status TEXT CHECK(status IN ('Pending', 'Accepted', 'Rejected'))
+        status TEXT CHECK(status IN ('Pending', 'Accepted', 'Rejected','Completed'))
     )
 """)
     c.execute("""
@@ -104,6 +121,29 @@ def connect_db():
         FOREIGN KEY (username_me) REFERENCES USERS(username),
         FOREIGN KEY (username_friendswith) REFERENCES USERS(username)
     )
+""")
+    #CREATIING GAME LIST TABLE
+    c.execute("""
+            CREATE TABLE IF NOT EXISTS GAME_LIST(
+              game_name TEXT UNIQUE NOT NULL,
+              game_genre TEXT NOT NULL,
+              game_description TEXT NOT NULL,
+              base_price INT NOT NULL
+              CHECK(base_price between 0 AND 120),
+              game_status TEXT CHECK(game_status in ('Active','Delisted')) NOT NULL,
+              dev_username TEXT NOT NULL,
+              rating_yes INT NOT NULL,
+              rating_no INT NOT NULL, 
+              copies_sold INT NOT NULL,
+              revenue_generated INT NOT NULL,
+              img_path_logo TEXT NOT NULL,
+              img_path_ss1 TEXT NOT NULL,
+              img_path_ss2 TEXT NOT NULL,
+              FOREIGN KEY (dev_username) REFERENCES USERS(username)
+
+
+              )
+
 """)
 
     
@@ -578,8 +618,33 @@ def view_friend_profile(friend_username):
         friend_data=c.fetchone()
         # Pass the friend's username to the template
         return render_template('ViewFriendProfile.html', friendusername=friend_username,buyer_username=session['username'],balance=balance,friend_email=friend_data[0],friend_account_status=friend_data[1].upper())
+     
+@app.route('/UploadGameDataForm/<game_name>')
+def uploadgamedta_formpage(game_name):
+     with sqlite3.connect('bashpos_--definitely--_secured_database.db') as db:
+
+        
+        # Pass the friend's username to the template
+        return render_template('upload_game_data.html',game_name=game_name,dev_username=session['username'])
+     
 
 
+
+
+
+
+
+
+@app.route('/ViewBuyerProfile/<buyer_username>')
+def view_buyer_profile(buyer_username):
+     with sqlite3.connect('bashpos_--definitely--_secured_database.db') as db:
+        c = db.cursor()
+        c.execute("SELECT balance FROM WALLET_BALANCE WHERE username = ?",(session['username'],))
+        balance = c.fetchone()[0]
+        c.execute("SELECT email,account_status FROM USERS WHERE username=?",(buyer_username,))
+        buyer_data=c.fetchone()
+        # Pass the friend's username to the template
+        return render_template('ViewBuyerProfile.html', friendusername=buyer_username,username=session['username'],balance=balance,friend_email=buyer_data[0],friend_account_status=buyer_data[1].upper())
 
 
 @app.route('/SendPublishingRequest', methods=['GET','POST'])
@@ -603,6 +668,70 @@ def Send_Publishing_Request():
             db.close()
         
             return  jsonify({"success": True,"message": "Publishing request for "+req_json['game_name']+ " sent successfully"})
+        
+@app.route('/uploadgamedata', methods=['GET','POST'])
+def uploadgamedata():
+     if request.method == 'POST':
+        db=sqlite3.connect("bashpos_--definitely--_secured_database.db")
+        c=db.cursor()
+        req_json = request.json
+        game_name=req_json.get('game_name')
+        game_genre=req_json.get('game_genre')
+        dev_username=req_json.get('dev_username')
+        game_description=req_json.get('game_description')
+        base_price=req_json.get('base_price')
+        logo=req_json.get('logo')
+        screenshot1=req_json.get('screenshot1')
+        screenshot2=req_json.get('screenshot2')
+        
+        print(game_description)
+        logo_data = base64.b64decode(logo)
+
+        # Generate a safe filename for the image
+        filename = f"{game_name.replace(' ', '_').lower()}_logo.png"
+        logo_file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        
+        # Save the image to the upload folder
+        with open(logo_file_path, 'wb') as f:
+            f.write(logo_data)
+        
+        ss1_data = base64.b64decode(screenshot1)
+
+        # Generate a safe filename for the image
+        filename = f"{game_name.replace(' ', '_').lower()}_ss1.png"
+        ss1_file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        
+        # Save the image to the upload folder
+        with open(ss1_file_path, 'wb') as f:
+            f.write(ss1_data)
+
+        ss2_data = base64.b64decode(screenshot2)
+
+        # Generate a safe filename for the image
+        filename = f"{game_name.replace(' ', '_').lower()}_ss2.png"
+        ss2_file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        
+        # Save the image to the upload folder
+        with open(ss2_file_path, 'wb') as f:
+            f.write(ss2_data) 
+
+ #########images send to  static/upload AND we will save the path data in DB
+                 # def __init__(self,game_name,game_genre,game_description,base_price):
+        game_data=Games_List(game_name,game_genre,game_description,base_price)
+        c.execute("  INSERT INTO GAME_LIST VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                  (game_data.game_name,game_data.game_genre,
+                game_data.game_description,game_data.base_price,'Active',dev_username,0,0,0,0,logo_file_path,ss1_file_path,ss2_file_path))
+        
+        c.execute("UPDATE GAME_PUBLISH_REQUEST SET status = 'Completed' WHERE username = ? and game_name=?", (dev_username, game_name))
+        db.commit()
+        return jsonify({"message": "Data for "+game_name+" uploaded successfully"})
+
+
+
+
+
+
+
 
 @app.route('/getPubReq', methods=['GET'])
 def getPub_Req_Avail(game_name):
