@@ -139,6 +139,10 @@ def connect_db():
               img_path_logo TEXT NOT NULL,
               img_path_ss1 TEXT NOT NULL,
               img_path_ss2 TEXT NOT NULL,
+              game_file_path TEXT NOT NULL,
+              sale_status TEXT CHECK(sale_status in(True,False)),
+              actual_price INT NOT NULL CHECK(actual_price between 0 AND 120),
+              sale_end_time DATETIME,
               FOREIGN KEY (dev_username) REFERENCES USERS(username)
 
 
@@ -436,6 +440,16 @@ def developer_dashboard():
 
         c.execute("SELECT game_name, status from GAME_PUBLISH_REQUEST WHERE username=?",(session['username'],))
         game_req_data = c.fetchall()
+        c.execute("SELECT game_name,game_status, base_price,copies_sold,sale_status,actual_price,sale_end_time FROM GAME_LIST WHERE dev_username=?",(dev_username,))
+        game_list_data=c.fetchall()
+        print(game_list_data)
+        c.execute("SELECT COUNT(*) FROM GAME_LIST WHERE dev_username=?",(dev_username,))
+        no_of_total_games=c.fetchone()[0]
+        c.execute("SELECT COUNT(*) FROM GAME_LIST WHERE dev_username=? AND game_status='Active'",(dev_username,))
+        no_of_games_active=c.fetchone()[0]
+        c.execute("SELECT SUM(copies_sold) FROM GAME_LIST WHERE dev_username=?",(dev_username,))
+        no_of_total__games_sold=c.fetchone()[0]
+        delisted_games_count=no_of_total_games-no_of_games_active
         
         
 
@@ -446,7 +460,9 @@ def developer_dashboard():
         # c.execute("SELECT username FROM USERS WHERE user_type ='buyer' and account_status = 'active'")
         # all_users = c.fetchall()
     return render_template('dev_dashboard.html',dev_username=dev_username, balance=balance,company_name=company_name,
-                           publisher_name=publisher_name.upper(),dev_email=dev_email,game_req_data=game_req_data)
+                           publisher_name=publisher_name.upper(),dev_email=dev_email,game_req_data=game_req_data,game_list_data=game_list_data,
+                           no_of_total__games_sold=no_of_total__games_sold, no_of_total_games= no_of_total_games,no_of_games_active=no_of_games_active,
+                           delisted_games_count=delisted_games_count)
 
 @app.route('/buyer_dashboard',methods=['GET','POST'])
 @login_required('buyer')
@@ -544,6 +560,20 @@ def terminate_buyer():
             c.execute("UPDATE USERS SET account_status = 'terminated' WHERE username = ?", (username,))
             db.commit()
         return jsonify({"message": f"User {username} terminated successfully."})
+    else:
+        return jsonify({"error": "Invalid request"}), 400
+
+@app.route('/DelistGame', methods=['POST'])
+def Delist_game():
+    data = request.json  
+    game_name = data.get('game_name')
+
+    if game_name:
+        with sqlite3.connect('bashpos_--definitely--_secured_database.db') as db:
+            c = db.cursor()
+            c.execute("UPDATE GAME_LIST SET game_status = 'Delisted' WHERE game_name = ?", (game_name,))
+            db.commit()
+        return jsonify({"message": f"{game_name} delisted successfully."})
     else:
         return jsonify({"error": "Invalid request"}), 400
 
@@ -683,6 +713,7 @@ def uploadgamedata():
         logo=req_json.get('logo')
         screenshot1=req_json.get('screenshot1')
         screenshot2=req_json.get('screenshot2')
+        game_file=req_json.get('game_file')
         
         print(game_description)
         logo_data = base64.b64decode(logo)
@@ -714,13 +745,23 @@ def uploadgamedata():
         # Save the image to the upload folder
         with open(ss2_file_path, 'wb') as f:
             f.write(ss2_data) 
+        
+        game_file_data = base64.b64decode(game_file)
+
+        # Generate a safe filename for the image
+        filename = f"{game_name.replace(' ', '_').lower()}_file.zip"
+        game_file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        
+        # Save the image to the upload folder
+        with open(game_file_path, 'wb') as f:
+            f.write(game_file_data)     
 
  #########images send to  static/upload AND we will save the path data in DB
                  # def __init__(self,game_name,game_genre,game_description,base_price):
         game_data=Games_List(game_name,game_genre,game_description,base_price)
-        c.execute("  INSERT INTO GAME_LIST VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)",
+        c.execute("  INSERT INTO GAME_LIST VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                   (game_data.game_name,game_data.game_genre,
-                game_data.game_description,game_data.base_price,'Active',dev_username,0,0,0,0,logo_file_path,ss1_file_path,ss2_file_path))
+                game_data.game_description,game_data.base_price,'Active',dev_username,0,0,0,0,logo_file_path,ss1_file_path,ss2_file_path,game_file_path,False,game_data.base_price,None))
         
         c.execute("UPDATE GAME_PUBLISH_REQUEST SET status = 'Completed' WHERE username = ? and game_name=?", (dev_username, game_name))
         db.commit()

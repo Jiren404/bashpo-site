@@ -101,6 +101,13 @@
                                 </label>
                                 <input id="img_ss2" type="file" class="mt-2 p-2 border border-gray-300 rounded-md w-full" accept="image/png, image/jpeg" required />
                             </div>
+                            <p class="text-l text-bold mt-5">Enter game file (compress and upload)</p>
+                            <div class="w-full mt-3">
+                                <label for="img_ss2" class="block text-sm text-gray-700 dark:text-gray-400">
+                                    <span class="font-semibold">Choose game file</span>
+                                </label>
+                                <input id="game_file" type="file" class="mt-2 p-2 border border-gray-300 rounded-md w-full" accept="file/rar, file/zip" required />
+                            </div>
 
 
                     
@@ -114,7 +121,7 @@
                         <button type="button" 
                                 class="px-5 h-[40px] lg:w-[300px] lg:h-[50px] bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg text-bold"
                                 onclick="uploadGameData(event)"> 
-                            Create Account
+                            Upload Data
                         </button>
                     </div>
                 </form>
@@ -139,6 +146,7 @@
     const logoFile = document.getElementById('img_logo').files[0];
     const screenshot1 = document.getElementById('img_ss1').files[0];
     const screenshot2 = document.getElementById('img_ss2').files[0];
+    const game_file = document.getElementById('game_file').files[0];
 
     // Log files to debug
     console.log("Logo file:", logoFile);
@@ -149,6 +157,7 @@
     const base64Logo = logoFile ? await fileToBase64(logoFile) : null;
     const base64Screenshot1 = screenshot1 ? await fileToBase64(screenshot1) : null;
     const base64Screenshot2 = screenshot2 ? await fileToBase64(screenshot2) : null;
+    const base64GameFiles = game_file ? await fileToBase64(game_file) : null;
 
     // Create form data object
     const formData = {
@@ -160,6 +169,7 @@
         logo: base64Logo,
         screenshot1: base64Screenshot1,
         screenshot2: base64Screenshot2,
+        game_file:base64GameFiles
     };
 
     try {

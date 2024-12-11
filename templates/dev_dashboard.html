@@ -125,18 +125,106 @@
                     class="box-border h-auto lg:h-[320px] w-full lg:w-[450px] p-4 border rounded-xl bg-[rgba(30,29,55,1)]">
                     <p class="text-base mb-5 font-bold text-white">Developer Name:   <span class="text-blue-500 ">{{ company_name }}</span></p>
                     <p class="text-base mb-5 font-bold text-white">Publisher Name: <span class="text-blue-500 ">{{publisher_name}}</span></p>
-                    <p class="text-base mb-5 font-bold text-white">Email: <span class="text-blue-500 ">{{dev_email}}</span></p>
-                    <p class="text-base mb-5 font-bold text-white">Total Games Released:</p>
-                    <p class="text-base mb-5 font-bold text-white">Total Copies Sold:</p>
+                    <p class="text-base mb-5 font-bold text-white">Email: <span class="text-blue-500 ">{{dev_email}}</span></p>   
+                    <p class="text-base mb-5 font-bold text-white">Total Games Released: <span class="text-blue-500 ">{{ no_of_total_games}}</span></p>
+                    <p class="text-base mb-5 font-bold text-white">Total Games Actived: <span class="text-blue-500 ">{{ no_of_games_active}}</span></p>
+                    <p class="text-base mb-5 font-bold text-white">Total Games Delisted: <span class="text-blue-500 ">{{ delisted_games_count}}</span></p>
+                    <p class="text-base mb-5 font-bold text-white">Total Copies Sold:<span class="text-blue-500 "> {{no_of_total__games_sold}}</span></p>
+                </div>
+                <div class="flex flex-col space-y-4">
+
+                <!--################View published games##########################################-->
+                  <!-- Right side: Buttons -->
+                  <button type="button" id="ViewPublishedGamesButton" data-modal-target="ViewPublishedGamesModal" data-modal-toggle="ViewPublishedGamesModal"
+                  class="w-[300px] h-[45px] font-bold bg-gradient-to-r from-blue-900 to-purple-700 text-white rounded-lg">
+                 View Published Games
+              </button>
+              <!-- Main modal -->
+<!-- Main modal -->
+<div id="ViewPublishedGamesModal" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed inset-0 z-50 justify-center items-center flex">
+    <div class="relative p-4 bg-white rounded-lg shadow dark:bg-gray-800 sm:p-5 w-full sm:w-1/2 lg:w-1/3">
+        <!-- Modal content -->
+        <div class="relative p-4 bg-white rounded-lg shadow dark:bg-gray-800 sm:p-5">
+            <!-- Modal header -->
+            <div class="flex justify-between mb-4 rounded-t sm:mb-5">
+                <div class="text-lg text-gray-900 md:text-xl dark:text-white">
+                    <h3 class="font-semibold">
+                        Published Games:
+                    </h3>
+                </div>
+                <div>
+                    <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 inline-flex dark:hover:bg-gray-600 dark:hover:text-white" data-modal-toggle="ViewPublishedGamesModal">
+                        <svg aria-hidden="true" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+                        <span class="sr-only">Close modal</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Search Bar -->
+            <div class="mb-4">
+                <input type="text" id="searchInput_games" placeholder="Search games..." class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring focus:border-blue-300">
+            </div>
+
+            <!-- Display list of active buyers -->
+            <div class="mt-4">
+                <!-- Header row -->
+                <div class="flex justify-between font-semibold mb-4">
+                    <div class="w-1/4 text-left">Game Name</div>
+                    <div class="w-1/4 text-left">Status</div>
+                    <div class="w-1/4 text-left">Base Price(in dollars)</div>
+                    <div class="w-1/4 text-left">Copies Sold</div>
+                    <div class="w-1/4 text-left">Action</div>
                 </div>
 
-                  <!-- Right side: Buttons -->
-            <div class="flex flex-col gap-4 w-full lg:w-auto">
-                <a href="publication_req.html">
-                    <button type="button" class="w-full lg:w-[300px] h-[45px] font-bold bg-gradient-to-r from-blue-900 to-purple-700 text-white rounded-lg">
-                        View Published Games
-                    </button>
-                </a>
+                <!-- List of game data -->
+                <ul id="buyerList" class="list-none">
+                    {% for game_data in game_list_data %}
+                        <li class="flex justify-between items-center mb-4">
+                            <span class="w-1/4">{{ game_data[0] }}</span> <!-- Game Name -->
+                            <span class="w-1/4">{{ game_data[1] }}</span> <!-- Status -->
+                            <span class="w-1/4">{{ game_data[2] }}</span> <!-- Base Price -->
+                            <span class="w-1/4">{{ game_data[3] }}</span> <!-- Base Price -->
+                            <div class="w-1/4 text-left">
+                                <!--will use this if i implement sale for project otherwise unused (not part of modules)-->
+                                {% if game_data[3] == 1 %}
+                                    <button type="button"
+                                            class="text-white bg-green-600 hover:bg-green-700 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-xs px-3 py-1.5 dark:bg-green-500 dark:hover:bg-green-600 dark:focus:ring-green-900"
+                                            data-game_name="{{ game_data[0] }}"
+                                            onclick="UploadGameData(this)">
+                                        Start Sale
+                                    </button>
+                                {% endif %}
+
+                                <!--end of unused feature(for now)-->
+
+
+                                {% if game_data[1] == 'Active' %}
+                                    <button type="button"
+                                            class="text-white bg-red-600 hover:bg-red-700 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-xs px-3 py-1.5 text-center dark:bg-red-500 dark:hover:bg-red-600 dark:focus:ring-red-900"
+                                            data-game_name_delist="{{ game_data[0] }}"
+                                            onclick="DelistGame(this)">
+                                        Delist
+                                    </button>
+                                {% endif %}
+                            </div> <!-- Action -->
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
 
                 <!-- Modal trigger button (Send Publication Request) -->
                 <div class="flex justify-end">
@@ -263,7 +351,7 @@
 </div>
 
 
-
+</div>
 
 
               
@@ -453,10 +541,57 @@
       }
     });
   }
+  function initializeSearch_games() {
+    const searchInput = document.getElementById('searchInput_games');
+    const userList = document.querySelectorAll('#ViewPublishedGamesModal ul li');
+
+    searchInput.addEventListener('input', function () {
+        const filter = searchInput.value.toLowerCase();
+
+        userList.forEach((userItem) => {
+            const username = userItem.querySelector('span').textContent.toLowerCase();
+
+            // Show or hide the user based on the search input
+            if (username.includes(filter)) {
+                userItem.style.display = ''; // Show
+            } else {
+                userItem.style.display = 'none'; // Hide
+            }
+        });
+    });
+}   
+  // Function to initialize modal functionality
+  function initializeModal_games() {
+    const openModalButton = document.getElementById('ViewPublishedGamesButton');
+    const modal = document.getElementById('ViewPublishedGamesModal');
+    const closeModalButton = modal.querySelector('[data-modal-toggle="ViewPublishedGamesModal"]');
+    
+    // Open the modal when the button is clicked
+    openModalButton.addEventListener('click', function() {
+      modal.classList.remove('hidden'); // Show the modal
+      document.body.style.overflow = 'hidden'; // Prevent body scrolling when modal is open
+    });
+
+    // Close the modal when the close button (X) is clicked
+    closeModalButton.addEventListener('click', function() {
+      modal.classList.add('hidden'); // Hide the modal
+      document.body.style.overflow = ''; // Re-enable body scrolling
+    });
+
+    // Close the modal if the user clicks outside of the modal content (overlay click)
+    modal.addEventListener('click', function(event) {
+      if (event.target === modal) {
+        modal.classList.add('hidden');
+        document.body.style.overflow = '';
+      }
+    });
+  }
     // Initialize the modal functionality
     window.addEventListener('DOMContentLoaded', function() {
         initializeModal_SendPubReqModal();
         initializeModal_statusRequest() ;
+        initializeSearch_games();
+        initializeModal_games();
 
     });
 
@@ -484,7 +619,32 @@ function UploadGameData(button) {
         const game_name = button.getAttribute('data-game_name');
         window.location.href = `/UploadGameDataForm/${game_name}`;
     }
+    function DelistGame(button) {
+        const game_name = button.getAttribute('data-game_name_delist');
 
+        fetch('/DelistGame', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ game_name: game_name })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.message) {
+                alert(data.message); // Display success message
+                button.closest('li').remove(); // Remove the user from the list
+                window.location.href = "/";
+            } else {
+                alert(data.error); // Display error message
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Something went wrong!');
+        });
+        
+    }
 
     
         // Logout function that clears the session and redirects to login
