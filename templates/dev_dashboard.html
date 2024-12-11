@@ -127,7 +127,7 @@
                     <p class="text-base mb-5 font-bold text-white">Publisher Name: <span class="text-blue-500 ">{{publisher_name}}</span></p>
                     <p class="text-base mb-5 font-bold text-white">Email: <span class="text-blue-500 ">{{dev_email}}</span></p>   
                     <p class="text-base mb-5 font-bold text-white">Total Games Released: <span class="text-blue-500 ">{{ no_of_total_games}}</span></p>
-                    <p class="text-base mb-5 font-bold text-white">Total Games Actived: <span class="text-blue-500 ">{{ no_of_games_active}}</span></p>
+                    <p class="text-base mb-5 font-bold text-white">Total Games Active: <span class="text-blue-500 ">{{ no_of_games_active}}</span></p>
                     <p class="text-base mb-5 font-bold text-white">Total Games Delisted: <span class="text-blue-500 ">{{ delisted_games_count}}</span></p>
                     <p class="text-base mb-5 font-bold text-white">Total Copies Sold:<span class="text-blue-500 "> {{no_of_total__games_sold}}</span></p>
                 </div>
@@ -186,7 +186,7 @@
                             <span class="w-1/4">{{ game_data[3] }}</span> <!-- Base Price -->
                             <div class="w-1/4 text-left">
                                 <!--will use this if i implement sale for project otherwise unused (not part of modules)-->
-                                {% if game_data[3] == 1 %}
+                                {% if game_data[4] == 0 %}
                                     <button type="button"
                                             class="text-white bg-green-600 hover:bg-green-700 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-xs px-3 py-1.5 dark:bg-green-500 dark:hover:bg-green-600 dark:focus:ring-green-900"
                                             data-game_name="{{ game_data[0] }}"
@@ -200,7 +200,7 @@
 
                                 {% if game_data[1] == 'Active' %}
                                     <button type="button"
-                                            class="text-white bg-red-600 hover:bg-red-700 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-xs px-3 py-1.5 text-center dark:bg-red-500 dark:hover:bg-red-600 dark:focus:ring-red-900"
+                                            class="text-white bg-red-600 hover:bg-red-700 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-xs px-5 py-1.5 text-center dark:bg-red-500 dark:hover:bg-red-600 dark:focus:ring-red-900"
                                             data-game_name_delist="{{ game_data[0] }}"
                                             onclick="DelistGame(this)">
                                         Delist
