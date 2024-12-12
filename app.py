@@ -186,7 +186,7 @@ def login():
         print(f"Username: {username}, Password: {password}")
 
       
-        c.execute("SELECT username, user_type FROM USERS WHERE username = ? AND password = ?", (username, password))
+        c.execute("SELECT username, user_type,store_region FROM USERS WHERE username = ? AND password = ?", (username, password))
         user = c.fetchone()
         c.execute("SELECT username, user_type FROM USERS WHERE username = ? AND password = ? AND account_status='active'", (username, password))
         user_active_check = c.fetchone()
@@ -197,6 +197,7 @@ def login():
         
                 session['username'] = user[0]
                 session['user_type'] = user[1]
+                session['store_region']=user[2]
             else:
                  return jsonify({"error": "Account Terminated due to fraudent activities"}), 401    
 
@@ -498,7 +499,8 @@ def buyer_profile():
         c.execute("SELECT username_friendswith FROM FRIENDS where username_me=?",(session['username'],))
         my_friends=c.fetchall()
 
-    return render_template('Buyer_profile.html',balance=balance,buyer_username=buyer_username,buyer_data=buyer_details,account_status=status,card_info=card_info,pending_requests=pending_requests,my_friends=my_friends)
+    return render_template('Buyer_profile.html',balance=balance,buyer_username=buyer_username,buyer_data=buyer_details,account_status=status,
+                           card_info=card_info,pending_requests=pending_requests,my_friends=my_friends,store_region=session['store_region'])
 
 
 
